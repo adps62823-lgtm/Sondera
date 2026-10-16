@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-surface-light dark:bg-surface-dark text-ink-primary dark:text-neutral-100 min-h-screen font-sans;
+  }
+}
+
+/* Accessibility: Text Scaling */
+html.text-scale-lg {
+  font-size: 18px;
+}
+
+/* Density control */
+html.density-compact .receipt-card,
+html.density-compact .p-6 {
+  padding: 1rem !important;
+}
+html.density-compact .p-5 {
+  padding: 0.75rem !important;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+/* Print Styles for Decision Receipts */
+@media print {
+  header, footer, nav, button, .no-print {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .receipt-card {
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+}

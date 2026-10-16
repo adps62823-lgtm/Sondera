@@ -173,14 +173,14 @@ export const WhatIfLab: React.FC<WhatIfLabProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-sm text-ink-primary dark:text-neutral-100">
-                What-If Scenario Lab
+                Scenario Simulator (Test Hypothetical Proof)
               </h3>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-mono uppercase bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-200 font-semibold">
-                Hypothetical Only
+                Simulation Only
               </span>
             </div>
             <p className="text-xs text-ink-secondary dark:text-neutral-400">
-              Explore how hypothetical evidence would change findings without modifying real case data.
+              Test what happens to the risk rating and trust score if official proof or debunks are uncovered.
             </p>
           </div>
         </div>

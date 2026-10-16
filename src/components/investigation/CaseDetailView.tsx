@@ -28,6 +28,8 @@ import { LocalNeuralAiPanel } from './LocalNeuralAiPanel';
 import { EvidenceManager } from '../evidence/EvidenceManager';
 import { CaseNotes } from '../notes/CaseNotes';
 import { DecisionReceiptView } from '../reports/DecisionReceiptView';
+import { AutomatedAuthenticityVerdictCard } from './AutomatedAuthenticityVerdictCard';
+import { runAutomatedAuthenticityAnalysis } from '../../core/engine/auto-authenticity-engine';
 import { db } from '../../services/db';
 import {
   ShieldAlert,
@@ -99,6 +101,7 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
   const { caseData, claims, evidence, relations, findings, checks, timelineEvents, notes, reports } =
     details;
   const trustDebt = calculateTrustDebt(claims, evidence, relations);
+  const autoAuth = runAutomatedAuthenticityAnalysis(caseData.originalInput, caseData.kind, caseId, caseData.userContext);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
@@ -348,12 +351,12 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
           onClick={() => setActiveTab('overview')}
           className={`flex items-center gap-1.5 px-4 py-2.5 font-medium border-b-2 transition whitespace-nowrap ${
             activeTab === 'overview'
-              ? 'border-forest-600 text-forest-800 dark:text-forest-200'
+              ? 'border-forest-600 text-forest-800 dark:text-forest-200 font-bold'
               : 'border-transparent text-ink-secondary dark:text-neutral-400 hover:text-ink-primary'
           }`}
         >
           <ShieldAlert className="w-4 h-4" />
-          <span>Findings & Overview</span>
+          <span>Verdict & Summary</span>
           {findings.length > 0 && (
             <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200">
               {findings.length}
@@ -365,36 +368,36 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
           onClick={() => setActiveTab('evidence')}
           className={`flex items-center gap-1.5 px-4 py-2.5 font-medium border-b-2 transition whitespace-nowrap ${
             activeTab === 'evidence'
-              ? 'border-forest-600 text-forest-800 dark:text-forest-200'
+              ? 'border-forest-600 text-forest-800 dark:text-forest-200 font-bold'
               : 'border-transparent text-ink-secondary dark:text-neutral-400 hover:text-ink-primary'
           }`}
         >
           <BookOpen className="w-4 h-4" />
-          <span>Claims & Evidence ({evidence.length})</span>
+          <span>Claims & Proof ({claims.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('timeline')}
           className={`flex items-center gap-1.5 px-4 py-2.5 font-medium border-b-2 transition whitespace-nowrap ${
             activeTab === 'timeline'
-              ? 'border-forest-600 text-forest-800 dark:text-forest-200'
+              ? 'border-forest-600 text-forest-800 dark:text-forest-200 font-bold'
               : 'border-transparent text-ink-secondary dark:text-neutral-400 hover:text-ink-primary'
           }`}
         >
           <Clock className="w-4 h-4" />
-          <span>Context Clock ({timelineEvents.length})</span>
+          <span>Timeline Analysis ({timelineEvents.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('graph')}
           className={`flex items-center gap-1.5 px-4 py-2.5 font-medium border-b-2 transition whitespace-nowrap ${
             activeTab === 'graph'
-              ? 'border-forest-600 text-forest-800 dark:text-forest-200'
+              ? 'border-forest-600 text-forest-800 dark:text-forest-200 font-bold'
               : 'border-transparent text-ink-secondary dark:text-neutral-400 hover:text-ink-primary'
           }`}
         >
           <Network className="w-4 h-4" />
-          <span>Trust Graph</span>
+          <span>Evidence Map</span>
         </button>
 
         <button
@@ -406,7 +409,7 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
           }`}
         >
           <FlaskConical className="w-4 h-4 text-purple-600" />
-          <span>What-If Lab</span>
+          <span>Scenario Simulator</span>
         </button>
 
         <button
@@ -418,14 +421,14 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
           }`}
         >
           <Cpu className="w-4 h-4 text-indigo-600" />
-          <span>Local Neural AI</span>
+          <span>AI Investigator</span>
         </button>
 
         <button
           onClick={() => setActiveTab('notes')}
           className={`flex items-center gap-1.5 px-4 py-2.5 font-medium border-b-2 transition whitespace-nowrap ${
             activeTab === 'notes'
-              ? 'border-forest-600 text-forest-800 dark:text-forest-200'
+              ? 'border-forest-600 text-forest-800 dark:text-forest-200 font-bold'
               : 'border-transparent text-ink-secondary dark:text-neutral-400 hover:text-ink-primary'
           }`}
         >
@@ -437,18 +440,23 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
           onClick={() => setActiveTab('receipt')}
           className={`flex items-center gap-1.5 px-4 py-2.5 font-medium border-b-2 transition whitespace-nowrap ${
             activeTab === 'receipt'
-              ? 'border-forest-600 text-forest-800 dark:text-forest-200'
+              ? 'border-forest-600 text-forest-800 dark:text-forest-200 font-bold'
               : 'border-transparent text-ink-secondary dark:text-neutral-400 hover:text-ink-primary'
           }`}
         >
           <FileText className="w-4 h-4" />
-          <span>Decision Receipt & Report</span>
+          <span>Official Report</span>
         </button>
       </div>
 
       {/* Tab Panels */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
+          <AutomatedAuthenticityVerdictCard
+            analysis={autoAuth}
+            onNavigateTab={(tab) => setActiveTab(tab)}
+          />
+
           <TrustDebtPanel
             assessment={trustDebt}
             onOpenMissingProof={() => setActiveTab('evidence')}

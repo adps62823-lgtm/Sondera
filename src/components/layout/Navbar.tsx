@@ -80,7 +80,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : 'text-ink-secondary hover:text-ink-primary dark:text-neutral-400 dark:hover:text-neutral-200'
               }`}
             >
-              Workspace
+              Home
             </button>
 
             <button
@@ -92,7 +92,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <PlusCircle className="w-3.5 h-3.5" />
-              <span>Investigate</span>
+              <span>Verify Message</span>
             </button>
 
             {activeCaseId && (
@@ -105,7 +105,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
               >
                 <Search className="w-3.5 h-3.5" />
-                <span>Active Case</span>
+                <span>Active Report</span>
               </button>
             )}
 
@@ -118,7 +118,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <FolderOpen className="w-3.5 h-3.5" />
-              <span>Cases</span>
+              <span>My Reports</span>
             </button>
 
             <button
@@ -130,7 +130,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <BookOpen className="w-3.5 h-3.5" />
-              <span>Threats</span>
+              <span>Scam Directory</span>
             </button>
 
             <button
@@ -142,7 +142,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Link2 className="w-3.5 h-3.5" />
-              <span>URL Lab</span>
+              <span>Link Checker</span>
             </button>
 
             <button
@@ -154,7 +154,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Scale className="w-3.5 h-3.5" />
-              <span>Comparator</span>
+              <span>Compare Sources</span>
             </button>
 
             <button
@@ -166,7 +166,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <GraduationCap className="w-3.5 h-3.5" />
-              <span>Gym</span>
+              <span>Safety Quiz</span>
             </button>
 
             <button
@@ -178,7 +178,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Lock className="w-3.5 h-3.5" />
-              <span>Privacy</span>
+              <span>Privacy Test</span>
             </button>
 
             {/* Emergency Button */}
@@ -191,7 +191,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <AlertOctagon className="w-3.5 h-3.5" />
-              <span>Emergency Help</span>
+              <span>SOS Emergency</span>
             </button>
           </nav>
 
@@ -227,7 +227,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               activeTab === 'workspace' ? 'bg-forest-100 font-semibold text-forest-900' : 'text-ink-secondary'
             }`}
           >
-            Workspace
+            Home
           </button>
           <button
             onClick={() => setActiveTab('investigate')}
@@ -235,7 +235,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               activeTab === 'investigate' ? 'bg-forest-600 font-semibold text-white' : 'text-forest-700'
             }`}
           >
-            + Investigate
+            + Verify
           </button>
           {activeCaseId && (
             <button
@@ -244,7 +244,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 activeTab === 'case_detail' ? 'bg-forest-100 font-semibold text-forest-900' : 'text-ink-secondary'
               }`}
             >
-              Active Case
+              Active Report
             </button>
           )}
           <button
@@ -253,7 +253,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               activeTab === 'cases' ? 'bg-forest-100 font-semibold text-forest-900' : 'text-ink-secondary'
             }`}
           >
-            Cases
+            My Reports
           </button>
           <button
             onClick={() => setActiveTab('emergency')}
@@ -261,7 +261,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               activeTab === 'emergency' ? 'bg-red-600 text-white' : 'text-red-600'
             }`}
           >
-            Emergency Help
+            SOS Help
           </button>
           <button
             onClick={() => setActiveTab('threats')}
@@ -269,7 +269,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               activeTab === 'threats' ? 'bg-forest-100 font-semibold text-forest-900' : 'text-ink-secondary'
             }`}
           >
-            Threats
+            Scam Directory
           </button>
           <button
             onClick={() => setActiveTab('url_lab')}
@@ -277,7 +277,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               activeTab === 'url_lab' ? 'bg-forest-100 font-semibold text-forest-900' : 'text-ink-secondary'
             }`}
           >
-            URL Lab
+            Link Checker
           </button>
           <button
             onClick={() => setActiveTab('comparator')}
@@ -285,7 +285,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               activeTab === 'comparator' ? 'bg-forest-100 font-semibold text-forest-900' : 'text-ink-secondary'
             }`}
           >
-            Comparator
+            Compare
           </button>
           <button
             onClick={() => setActiveTab('learn')}
@@ -293,7 +293,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               activeTab === 'learn' ? 'bg-forest-100 font-semibold text-forest-900' : 'text-ink-secondary'
             }`}
           >
-            Gym
+            Quiz
           </button>
           <button
             onClick={() => setActiveTab('privacy')}

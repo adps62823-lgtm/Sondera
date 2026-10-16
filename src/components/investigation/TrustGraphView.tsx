@@ -47,10 +47,10 @@ export const TrustGraphView: React.FC<TrustGraphViewProps> = ({
           </div>
           <div>
             <h3 className="font-bold text-sm text-ink-primary dark:text-neutral-100">
-              Trust Graph & Relational Mapping
+              Visual Evidence Map (Claims vs Official Proof)
             </h3>
             <p className="text-xs text-ink-secondary dark:text-neutral-400">
-              Visualizing evidence links between claims, observations, and source documents.
+              Interactive network showing claims made by the sender connected to regulatory refutations (red lines) and verified facts.
             </p>
           </div>
         </div>

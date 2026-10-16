@@ -180,9 +180,9 @@ export const WorkspaceHome: React.FC<WorkspaceHomeProps> = ({
               </div>
               <div>
                 <h4 className="font-bold text-xs text-ink-primary dark:text-neutral-100">
-                  Threat Encyclopedia
+                  Scam Directory
                 </h4>
-                <p className="text-[11px] text-ink-muted">10 modern scam anatomies</p>
+                <p className="text-[11px] text-ink-muted">10 modern scam breakdowns</p>
               </div>
             </div>
             <ArrowRight className="w-4 h-4 text-ink-muted" />
@@ -200,9 +200,9 @@ export const WorkspaceHome: React.FC<WorkspaceHomeProps> = ({
               </div>
               <div>
                 <h4 className="font-bold text-xs text-ink-primary dark:text-neutral-100">
-                  URL & QR Deep Lab
+                  Link & QR Inspector
                 </h4>
-                <p className="text-[11px] text-ink-muted">Dissect payload & homoglyphs</p>
+                <p className="text-[11px] text-ink-muted">Dissect UPI & disguised links</p>
               </div>
             </div>
             <ArrowRight className="w-4 h-4 text-ink-muted" />
@@ -220,9 +220,9 @@ export const WorkspaceHome: React.FC<WorkspaceHomeProps> = ({
               </div>
               <div>
                 <h4 className="font-bold text-xs text-ink-primary dark:text-neutral-100">
-                  Claim Comparator
+                  Compare Sources
                 </h4>
-                <p className="text-[11px] text-ink-muted">Dual-source debunk matrix</p>
+                <p className="text-[11px] text-ink-muted">Side-by-side claim checking</p>
               </div>
             </div>
             <ArrowRight className="w-4 h-4 text-ink-muted" />

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TimelineEvent } from '../../types/domain';
-import { Clock, Plus, Calendar, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Clock, Plus, Calendar, AlertTriangle, CheckCircle2, Info } from 'lucide-react';
 import { db } from '../../services/db';
 
 interface ContextClockViewProps {
@@ -90,10 +90,10 @@ export const ContextClockView: React.FC<ContextClockViewProps> = ({
           </div>
           <div>
             <h3 className="font-bold text-sm text-ink-primary dark:text-neutral-100">
-              Context Clock & Chronology
+              Timeline Analysis & Panic Window
             </h3>
             <p className="text-xs text-ink-secondary dark:text-neutral-400">
-              Disentangling event dates from publication dates, receipt dates, and updates.
+              Tracking how attackers manipulate timing and deadlines to induce panic.
             </p>
           </div>
         </div>
@@ -105,6 +105,17 @@ export const ContextClockView: React.FC<ContextClockViewProps> = ({
           <Plus className="w-3.5 h-3.5" />
           <span>{showAdd ? 'Cancel' : 'Add Date Event'}</span>
         </button>
+      </div>
+
+      {/* Educational Walkthrough Banner */}
+      <div className="p-4 rounded-xl bg-indigo-50/60 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-900/60 space-y-1.5 text-xs">
+        <span className="font-bold text-indigo-900 dark:text-indigo-300 flex items-center gap-1.5">
+          <Info className="w-4 h-4 text-indigo-600" />
+          <span>How Attackers Weaponize the Timeline (The Panic Window)</span>
+        </span>
+        <p className="text-ink-secondary dark:text-neutral-300 text-[11px] leading-relaxed">
+          Fraudsters and disinformation campaigns depend on <strong>temporal manipulation</strong>: they deliver messages in the evening (when official customer support and bank branches are closed), manufacture an artificial 1–2 hour deadline to prevent you from consulting friends or family, and demand immediate unverified action.
+        </p>
       </div>
 
       {/* Temporal Anomalies Alert */}

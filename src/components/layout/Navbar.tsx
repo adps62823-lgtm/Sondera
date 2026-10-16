@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAppMode } from '../../context/ModeContext';
 import {
   ShieldAlert,
   Search,
@@ -43,6 +44,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   theme,
   toggleTheme,
 }) => {
+  const { mode, setMode, toggleMode } = useAppMode();
   return (
     <header className="sticky top-0 z-40 w-full border-b border-surface-border dark:border-surface-darkBorder bg-surface-light/95 dark:bg-surface-dark/95 backdrop-blur">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -195,8 +197,43 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           </nav>
 
-          {/* Action Tools & Theme */}
+          {/* Action Tools, Simple/Technical Mode & Theme */}
           <div className="flex items-center gap-2">
+            {/* Simple vs Technical Mode Switch */}
+            <div className="hidden sm:flex items-center bg-surface-muted dark:bg-surface-darkMuted p-1 rounded-xl border border-surface-border/60 dark:border-surface-darkBorder/60">
+              <button
+                onClick={() => setMode('simple')}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
+                  mode === 'simple'
+                    ? 'bg-white dark:bg-surface-darkCard text-forest-800 dark:text-forest-200 shadow-xs'
+                    : 'text-ink-secondary dark:text-neutral-400 hover:text-ink-primary'
+                }`}
+                title="Simple Mode: Clear, friendly plain English for non-technical users"
+              >
+                <span>🌱 Simple</span>
+              </button>
+              <button
+                onClick={() => setMode('technical')}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
+                  mode === 'technical'
+                    ? 'bg-white dark:bg-surface-darkCard text-indigo-800 dark:text-indigo-200 shadow-xs'
+                    : 'text-ink-secondary dark:text-neutral-400 hover:text-ink-primary'
+                }`}
+                title="Technical Mode: Detailed URL parsing, ports, WebGPU tensor metrics"
+              >
+                <span>⚙️ Technical</span>
+              </button>
+            </div>
+
+            {/* Mobile Mode Toggle Icon */}
+            <button
+              onClick={toggleMode}
+              className="sm:hidden px-2 py-1 rounded-lg text-[10px] font-bold border border-surface-border bg-surface-muted text-ink-primary"
+              title="Toggle Simple / Technical Mode"
+            >
+              {mode === 'simple' ? '🌱 Simple' : '⚙️ Tech'}
+            </button>
+
             <button
               onClick={toggleTheme}
               aria-label="Toggle visual theme"

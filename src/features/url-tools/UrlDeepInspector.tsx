@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { parseUrlSafely } from '../../core/rules/url-rules';
+import { useAppMode } from '../../context/ModeContext';
 import {
   Link2,
   QrCode,
@@ -12,9 +13,14 @@ import {
   Code,
   ArrowRight,
   Sparkles,
+  ShieldCheck,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 export const UrlDeepInspector: React.FC = () => {
+  const { mode } = useAppMode();
+  const [showTechnicalOverride, setShowTechnicalOverride] = useState(false);
   const [inputUrl, setInputUrl] = useState(
     'https://secure.paypal.com:account-check@portal-login-verify.xyz:8443/auth/step2?token=secret9821#section-pin'
   );
@@ -133,83 +139,164 @@ export const UrlDeepInspector: React.FC = () => {
           </div>
         </div>
       ) : (
-        /* Standard URL Syntactic Breakdown */
+        /* URL Breakdown Section (Simple vs Technical Mode) */
         <div className="bg-white dark:bg-surface-darkCard p-6 rounded-3xl border border-surface-border dark:border-surface-darkBorder shadow-sm space-y-5">
-          <h3 className="font-bold text-sm text-ink-primary dark:text-neutral-100 border-b border-surface-border/50 pb-3 flex items-center gap-2">
-            <Code className="w-4 h-4 text-forest-700 dark:text-forest-400" />
-            <span>Interactive URL Anatomical Segments</span>
-          </h3>
-
-          {/* Color-Coded Segments Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-            <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800">
-              <span className="block text-[10px] uppercase font-bold text-blue-800 dark:text-blue-300">
-                1. Protocol / Scheme
-              </span>
-              <span className="font-bold font-mono text-ink-primary dark:text-neutral-100">
-                {parsed.scheme || 'None'}:
-              </span>
-              <p className="text-[10px] text-blue-900 dark:text-blue-300 mt-1">
-                {parsed.scheme === 'https' ? 'Encrypted transit (HTTPS)' : 'Unencrypted / non-standard'}
-              </p>
-            </div>
-
-            <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800">
-              <span className="block text-[10px] uppercase font-bold text-red-800 dark:text-red-300">
-                2. User-Info Credentials
-              </span>
-              <span className="font-bold font-mono text-ink-primary dark:text-neutral-100 truncate block">
-                {parsed.userInfo ? `${parsed.userInfo}@` : 'None (Safe)'}
-              </span>
-              <p className="text-[10px] text-red-900 dark:text-red-300 mt-1">
-                {parsed.hasUserInfo ? '⚠️ TRICK: Ignored by browser!' : 'Standard clean connection'}
-              </p>
-            </div>
-
-            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
-              <span className="block text-[10px] uppercase font-bold text-emerald-800 dark:text-emerald-300">
-                3. True Target Hostname
-              </span>
-              <span className="font-bold font-mono text-ink-primary dark:text-neutral-100 truncate block">
-                {parsed.hostname || 'Invalid'}
-              </span>
-              <p className="text-[10px] text-emerald-900 dark:text-emerald-300 mt-1">
-                This is the actual server contacted!
-              </p>
-            </div>
-
-            <div className="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800">
-              <span className="block text-[10px] uppercase font-bold text-purple-800 dark:text-purple-300">
-                4. Port Number
-              </span>
-              <span className="font-bold font-mono text-ink-primary dark:text-neutral-100">
-                :{parsed.port || 'Default'}
-              </span>
-              <p className="text-[10px] text-purple-900 dark:text-purple-300 mt-1">
-                {parsed.port === '443' || parsed.port === '80' ? 'Standard web port' : 'Unconventional port'}
-              </p>
-            </div>
-          </div>
-
-          {/* Path and Query Breakdown */}
-          <div className="p-3.5 bg-surface-muted dark:bg-surface-darkMuted rounded-xl text-xs space-y-1 font-mono">
-            <div>
-              <span className="text-ink-muted font-sans font-semibold">Pathname: </span>
-              <span className="text-ink-primary dark:text-neutral-200">{parsed.pathname || '/'}</span>
-            </div>
-            {parsed.search && (
-              <div>
-                <span className="text-ink-muted font-sans font-semibold">Query String: </span>
-                <span className="text-amber-800 dark:text-amber-300">{parsed.search}</span>
+          {mode === 'simple' && !showTechnicalOverride ? (
+            /* Simple Mode: Clean, Plain-English Verdict */
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-surface-border/50 pb-3">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="w-5 h-5 text-forest-700 dark:text-forest-400" />
+                  <h3 className="font-bold text-sm text-ink-primary dark:text-neutral-100">
+                    Simple Link Verdict
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowTechnicalOverride(true)}
+                  className="flex items-center gap-1 text-xs text-forest-700 dark:text-forest-400 hover:underline font-medium"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Show Technical Breakdown</span>
+                </button>
               </div>
-            )}
-            {parsed.hash && (
-              <div>
-                <span className="text-ink-muted font-sans font-semibold">Hash Anchor: </span>
-                <span className="text-purple-800 dark:text-purple-300">{parsed.hash}</span>
+
+              {/* Destination Card */}
+              <div
+                className={`p-5 rounded-2xl border ${
+                  parsed.hasUserInfo || !parsed.isValid
+                    ? 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900'
+                    : 'bg-surface-muted dark:bg-surface-darkMuted border-surface-border'
+                } space-y-3`}
+              >
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-ink-muted tracking-wider block">
+                    Actual Real-World Destination:
+                  </span>
+                  <div className="text-xl font-mono font-extrabold text-ink-primary dark:text-neutral-100 mt-1">
+                    {parsed.hostname || 'Invalid Address'}
+                  </div>
+                </div>
+
+                {parsed.hasUserInfo && (
+                  <div className="p-3.5 bg-red-100/80 dark:bg-red-900/50 rounded-xl text-xs text-red-950 dark:text-red-100 space-y-1.5 border border-red-300 dark:border-red-800">
+                    <p className="font-bold flex items-center gap-1.5 text-red-900 dark:text-red-200">
+                      <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+                      <span>Trick Detected: Disguised Identity</span>
+                    </p>
+                    <p className="leading-relaxed">
+                      This link deliberately includes <strong>"{parsed.userInfo}"</strong> to trick you into thinking it belongs to a trusted brand like PayPal or a bank.
+                      <strong> Web browsers completely ignore everything before the "@" symbol</strong> and connect straight to the external server <strong>"{parsed.hostname}"</strong>!
+                    </p>
+                  </div>
+                )}
+
+                <div className="pt-2 text-xs border-t border-surface-border/40 space-y-1">
+                  <span className="font-bold text-ink-primary dark:text-neutral-200 block">
+                    What Should You Do?
+                  </span>
+                  <p className="text-ink-secondary dark:text-neutral-300">
+                    {parsed.hasUserInfo
+                      ? '🛑 Do NOT click this link or enter passwords on this site. It is an intentional scam designed to steal your credentials.'
+                      : 'Always check if the website address above matches the official domain before logging in.'}
+                  </p>
+                </div>
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            /* Technical Mode: Full Anatomical Breakdown */
+            <div className="space-y-5">
+              <div className="flex items-center justify-between border-b border-surface-border/50 pb-3">
+                <div className="flex items-center gap-2">
+                  <Code className="w-4 h-4 text-forest-700 dark:text-forest-400" />
+                  <h3 className="font-bold text-sm text-ink-primary dark:text-neutral-100">
+                    Interactive URL Anatomical Segments (Technical Mode)
+                  </h3>
+                </div>
+                {mode === 'simple' && (
+                  <button
+                    type="button"
+                    onClick={() => setShowTechnicalOverride(false)}
+                    className="flex items-center gap-1 text-xs text-ink-muted hover:text-ink-primary"
+                  >
+                    <EyeOff className="w-3.5 h-3.5" />
+                    <span>Hide Technical View</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Color-Coded Segments Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800">
+                  <span className="block text-[10px] uppercase font-bold text-blue-800 dark:text-blue-300">
+                    1. Protocol / Scheme
+                  </span>
+                  <span className="font-bold font-mono text-ink-primary dark:text-neutral-100">
+                    {parsed.scheme || 'None'}:
+                  </span>
+                  <p className="text-[10px] text-blue-900 dark:text-blue-300 mt-1">
+                    {parsed.scheme === 'https' ? 'Encrypted transit (HTTPS)' : 'Unencrypted / non-standard'}
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800">
+                  <span className="block text-[10px] uppercase font-bold text-red-800 dark:text-red-300">
+                    2. User-Info Credentials
+                  </span>
+                  <span className="font-bold font-mono text-ink-primary dark:text-neutral-100 truncate block">
+                    {parsed.userInfo ? `${parsed.userInfo}@` : 'None (Safe)'}
+                  </span>
+                  <p className="text-[10px] text-red-900 dark:text-red-300 mt-1">
+                    {parsed.hasUserInfo ? '⚠️ TRICK: Ignored by browser!' : 'Standard clean connection'}
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
+                  <span className="block text-[10px] uppercase font-bold text-emerald-800 dark:text-emerald-300">
+                    3. True Target Hostname
+                  </span>
+                  <span className="font-bold font-mono text-ink-primary dark:text-neutral-100 truncate block">
+                    {parsed.hostname || 'Invalid'}
+                  </span>
+                  <p className="text-[10px] text-emerald-900 dark:text-emerald-300 mt-1">
+                    This is the actual server contacted!
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800">
+                  <span className="block text-[10px] uppercase font-bold text-purple-800 dark:text-purple-300">
+                    4. Port Number
+                  </span>
+                  <span className="font-bold font-mono text-ink-primary dark:text-neutral-100">
+                    :{parsed.port || 'Default'}
+                  </span>
+                  <p className="text-[10px] text-purple-900 dark:text-purple-300 mt-1">
+                    {parsed.port === '443' || parsed.port === '80' ? 'Standard web port' : 'Unconventional port'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Path and Query Breakdown */}
+              <div className="p-3.5 bg-surface-muted dark:bg-surface-darkMuted rounded-xl text-xs space-y-1 font-mono">
+                <div>
+                  <span className="text-ink-muted font-sans font-semibold">Pathname: </span>
+                  <span className="text-ink-primary dark:text-neutral-200">{parsed.pathname || '/'}</span>
+                </div>
+                {parsed.search && (
+                  <div>
+                    <span className="text-ink-muted font-sans font-semibold">Query String: </span>
+                    <span className="text-amber-800 dark:text-amber-300">{parsed.search}</span>
+                  </div>
+                )}
+                {parsed.hash && (
+                  <div>
+                    <span className="text-ink-muted font-sans font-semibold">Hash Anchor: </span>
+                    <span className="text-purple-800 dark:text-purple-300">{parsed.hash}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

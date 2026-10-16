@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { ModeProvider } from './context/ModeContext';
+import { DesktopPetCompanion } from './components/companion/DesktopPetCompanion';
 import { Navbar, NavTab } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { WorkspaceHome } from './components/workspace/WorkspaceHome';
@@ -78,65 +80,73 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-surface-light dark:bg-surface-dark text-ink-primary dark:text-neutral-100">
-      <Navbar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        activeCaseId={activeCaseId}
-        theme={theme}
-        toggleTheme={toggleTheme}
-      />
+    <ModeProvider>
+      <div className="min-h-screen flex flex-col bg-surface-light dark:bg-surface-dark text-ink-primary dark:text-neutral-100 relative">
+        <Navbar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          activeCaseId={activeCaseId}
+          theme={theme}
+          toggleTheme={toggleTheme}
+        />
 
-      <main className="flex-1">
-        {activeTab === 'workspace' && (
-          <WorkspaceHome
-            onStartInvestigation={handleStartInvestigation}
-            onOpenCase={handleOpenCase}
-            onOpenPrivacy={() => setActiveTab('privacy')}
-            onOpenGym={() => setActiveTab('learn')}
-            onOpenEmergency={() => setActiveTab('emergency')}
-            onOpenThreats={() => setActiveTab('threats')}
-            onOpenUrlLab={() => setActiveTab('url_lab')}
-            onOpenComparator={() => setActiveTab('comparator')}
-          />
-        )}
+        <main className="flex-1">
+          {activeTab === 'workspace' && (
+            <WorkspaceHome
+              onStartInvestigation={handleStartInvestigation}
+              onOpenCase={handleOpenCase}
+              onOpenPrivacy={() => setActiveTab('privacy')}
+              onOpenGym={() => setActiveTab('learn')}
+              onOpenEmergency={() => setActiveTab('emergency')}
+              onOpenThreats={() => setActiveTab('threats')}
+              onOpenUrlLab={() => setActiveTab('url_lab')}
+              onOpenComparator={() => setActiveTab('comparator')}
+            />
+          )}
 
-        {activeTab === 'investigate' && (
-          <IntakeForm onSubmit={handleCreateCase} isSubmitting={isSubmitting} />
-        )}
+          {activeTab === 'investigate' && (
+            <IntakeForm onSubmit={handleCreateCase} isSubmitting={isSubmitting} />
+          )}
 
-        {activeTab === 'case_detail' && activeCaseId && (
-          <CaseDetailView
-            caseId={activeCaseId}
-            onBackToCases={() => setActiveTab('cases')}
-          />
-        )}
+          {activeTab === 'case_detail' && activeCaseId && (
+            <CaseDetailView
+              caseId={activeCaseId}
+              onBackToCases={() => setActiveTab('cases')}
+            />
+          )}
 
-        {activeTab === 'cases' && (
-          <CasesLibraryView
-            onSelectCase={handleOpenCase}
-            onNewInvestigation={() => setActiveTab('investigate')}
-          />
-        )}
+          {activeTab === 'cases' && (
+            <CasesLibraryView
+              onSelectCase={handleOpenCase}
+              onNewInvestigation={() => setActiveTab('investigate')}
+            />
+          )}
 
-        {activeTab === 'emergency' && <EmergencyResponseWizard />}
+          {activeTab === 'emergency' && <EmergencyResponseWizard />}
 
-        {activeTab === 'threats' && <ThreatEncyclopedia />}
+          {activeTab === 'threats' && <ThreatEncyclopedia />}
 
-        {activeTab === 'url_lab' && <UrlDeepInspector />}
+          {activeTab === 'url_lab' && <UrlDeepInspector />}
 
-        {activeTab === 'comparator' && <ClaimComparator />}
+          {activeTab === 'comparator' && <ClaimComparator />}
 
-        {activeTab === 'learn' && <JudgmentGymView />}
+          {activeTab === 'learn' && <JudgmentGymView />}
 
-        {activeTab === 'privacy' && <PrivacyNavigatorView />}
+          {activeTab === 'privacy' && <PrivacyNavigatorView />}
 
-        {activeTab === 'settings' && (
-          <SettingsView theme={theme} toggleTheme={toggleTheme} />
-        )}
-      </main>
+          {activeTab === 'settings' && (
+            <SettingsView theme={theme} toggleTheme={toggleTheme} />
+          )}
+        </main>
 
-      <Footer />
-    </div>
+        <Footer />
+
+        {/* Floating Desktop Pet & AI Companion */}
+        <DesktopPetCompanion
+          onNavigate={(tab) => setActiveTab(tab)}
+          currentTab={activeTab}
+        />
+      </div>
+    </ModeProvider>
   );
 };

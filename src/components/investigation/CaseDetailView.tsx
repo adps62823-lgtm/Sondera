@@ -30,6 +30,7 @@ import { CaseNotes } from '../notes/CaseNotes';
 import { DecisionReceiptView } from '../reports/DecisionReceiptView';
 import { AutomatedAuthenticityVerdictCard } from './AutomatedAuthenticityVerdictCard';
 import { runAutomatedAuthenticityAnalysis } from '../../core/engine/auto-authenticity-engine';
+import { useAppMode } from '../../context/ModeContext';
 import { db } from '../../services/db';
 import {
   ShieldAlert,
@@ -56,6 +57,7 @@ interface CaseDetailViewProps {
 }
 
 export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackToCases }) => {
+  const { mode } = useAppMode();
   const [details, setDetails] = useState<{
     caseData?: InvestigationCase;
     claims: Claim[];
@@ -488,7 +490,28 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
                 </pre>
               </div>
 
-              <ChecksOverview checks={checks} />
+              {mode === 'technical' ? (
+                <ChecksOverview checks={checks} />
+              ) : (
+                <div className="bg-white dark:bg-surface-darkCard rounded-2xl border border-surface-border dark:border-surface-darkBorder p-5 shadow-sm space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-ink-primary dark:text-neutral-100">
+                      Automated Verification Suite
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-semibold">
+                      Evaluated
+                    </span>
+                  </div>
+                  <p className="text-xs text-ink-secondary dark:text-neutral-400">
+                    Sondera cross-referenced message urgency, known telecom sender headers, statutory utility laws, and banking KYC circulars.
+                  </p>
+                  <div className="pt-2 border-t border-surface-border/50">
+                    <span className="text-[11px] text-ink-muted block">
+                      To see raw rule IDs and regex check records, switch to <strong>Technical Mode</strong> in the top navbar.
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

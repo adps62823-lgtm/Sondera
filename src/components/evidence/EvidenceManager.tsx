@@ -436,7 +436,7 @@ export const EvidenceManager: React.FC<EvidenceManagerProps> = ({
 
         {evidence.length === 0 ? (
           <p className="text-xs text-ink-muted dark:text-neutral-400 italic text-center py-4">
-            No external sources attached to this case yet. Add official press releases or links to reduce Trust Debt.
+            No sources are attached yet. Run web research above or add a source link and review it against a claim.
           </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

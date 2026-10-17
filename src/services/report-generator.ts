@@ -152,7 +152,7 @@ export function generateDecisionReceiptMarkdown(options: GenerateReportOptions):
 
   // 5. Trust Debt & Evidence Gaps
   if (selectedSections.includes('debt')) {
-    lines.push(`## 5. Trust Debt & Evidence Gap Assessment`);
+    lines.push(`## 5. Evidence coverage and gaps`);
     lines.push(`- **Assessment Level:** **${trustDebt.level.toUpperCase()}**`);
     lines.push(`- **Headline:** ${trustDebt.headline}`);
     if (trustDebt.reasons.length > 0) {
@@ -189,7 +189,7 @@ export function generateDecisionReceiptMarkdown(options: GenerateReportOptions):
 
   // 7. Timeline & Chronology (Context Clock)
   if (selectedSections.includes('timeline')) {
-    lines.push(`## 7. Context Chronology (Context Clock)`);
+    lines.push(`## 7. Timeline`);
     if (timelineEvents.length === 0) {
       lines.push(`*No dated events recorded.*`);
     } else {

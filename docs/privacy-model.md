@@ -1,18 +1,20 @@
 # Sondera — Privacy & Data Sovereignty Model
 
-## 1. Zero-Cloud Default
-Sondera is designed from the ground up on a **local-first** paradigm. The core investigative workflow does not send user-submitted messages, raw URLs, or investigator notes to any external cloud, AI provider, or backend telemetry server.
+## 1. Local Checks and Optional Online Research
+Cases, local warning checks, and stored evidence remain in the browser. Live source research and AI chat are optional. When the user starts one, the relevant message or question and the user-provided Gemini API key are sent to Google Gemini; source research also enables Google Search grounding. Do not submit sensitive personal content to online research.
 
 ## 2. Where Data is Stored
 All application state resides within the client's local browser environment:
 - **Storage Engine:** IndexedDB via `Dexie.js`.
 - **Database Name:** `SonderaDB`.
 - **Tables:** `cases`, `claims`, `evidence`, `relations`, `findings`, `checks`, `timelineEvents`, `notes`, `reports`, `settings`, `learningProgress`, `privacyChecklist`.
-- **Encryption in Transit:** N/A (data does not leave the browser).
+- Local records are stored by the browser. Optional Gemini requests use HTTPS; message contents are transmitted to Google only after the user starts the online feature.
 
 ## 3. What Leaves the Device
-- **By Default:** **Nothing.** All deterministic heuristics, URL parsers, Trust Debt calculations, and Decision Receipts run locally in the browser runtime.
-- **External Lookups (Optional/Future):** If an external reputation API or web search adapter is enabled in Settings, Sondera explicitly prompts for consent, discloses the provider, specifies what data is transmitted, and logs the request in the transparent Check Registry.
+- **Local:** Deterministic warning patterns, URL parsing, case storage, and report creation run in the browser.
+- **Optional Online:** The user clicks “Research this message” to send the message to Gemini with Google Search enabled. Returned source links can be saved as unreviewed evidence. Questions asked in the case chat or companion are also sent to Gemini when a key is configured.
+- **API Key:** The user's Gemini key is stored in browser local storage. It is not bundled in the application. Anyone with access to this browser profile may be able to inspect local storage.
+- **Model Download:** Optional Hugging Face text classification downloads model files to the browser cache on first use.
 
 ## 4. Local Storage Lifecycles & Limitations
 Because data is saved locally in IndexedDB:

@@ -154,10 +154,10 @@ export const WorkspaceHome: React.FC<WorkspaceHomeProps> = ({
               <FileQuestion className="w-6 h-6" />
             </div>
             <h3 className="font-bold text-base text-ink-primary dark:text-neutral-100">
-              Viral Claim & Evidence Review
+              Check a claim
             </h3>
             <p className="text-xs text-ink-secondary dark:text-neutral-400 mt-2 leading-relaxed">
-              Track Trust Debt. Map claims against official sources, identify missing original announcements, and separate forwards from proof.
+              Search current sources, compare what they say, and keep the links beside each claim.
             </p>
           </div>
           <div className="mt-4 pt-3 border-t border-surface-border/50 dark:border-surface-darkBorder/50 flex items-center justify-between text-xs font-semibold text-forest-700 dark:text-forest-400">
@@ -328,7 +328,7 @@ export const WorkspaceHome: React.FC<WorkspaceHomeProps> = ({
               onClick={onOpenGym}
               className="px-3.5 py-1.5 rounded-xl bg-forest-900 text-white text-xs font-medium hover:bg-forest-800 transition"
             >
-              Train in Judgment Gym →
+              Try the Safety Quiz →
             </button>
             <button
               onClick={onOpenPrivacy}

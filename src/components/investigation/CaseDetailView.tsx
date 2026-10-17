@@ -20,7 +20,6 @@ import { SaveIndicator, SaveStatus } from '../layout/SaveIndicator';
 import { FindingsList } from './FindingsList';
 import { ChecksOverview } from './ChecksOverview';
 import { TrustDebtPanel } from './TrustDebtPanel';
-import { MissingProofPanel } from './MissingProofPanel';
 import { ContextClockView } from './ContextClockView';
 import { TrustGraphView } from './TrustGraphView';
 import { WhatIfLab } from './WhatIfLab';
@@ -28,8 +27,7 @@ import { LocalNeuralAiPanel } from './LocalNeuralAiPanel';
 import { EvidenceManager } from '../evidence/EvidenceManager';
 import { CaseNotes } from '../notes/CaseNotes';
 import { DecisionReceiptView } from '../reports/DecisionReceiptView';
-import { AutomatedAuthenticityVerdictCard } from './AutomatedAuthenticityVerdictCard';
-import { runAutomatedAuthenticityAnalysis } from '../../core/engine/auto-authenticity-engine';
+import { SourceResearchPanel } from './SourceResearchPanel';
 import { useAppMode } from '../../context/ModeContext';
 import { db } from '../../services/db';
 import {
@@ -103,7 +101,6 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
   const { caseData, claims, evidence, relations, findings, checks, timelineEvents, notes, reports } =
     details;
   const trustDebt = calculateTrustDebt(claims, evidence, relations);
-  const autoAuth = runAutomatedAuthenticityAnalysis(caseData.originalInput, caseData.kind, caseId, caseData.userContext);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
@@ -334,7 +331,7 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-forest-900 hover:bg-forest-800 text-white text-xs font-medium transition"
           >
             <FileText className="w-3.5 h-3.5" />
-            <span>Decision Receipt</span>
+            <span>Report</span>
           </button>
 
           <button
@@ -358,7 +355,7 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
           }`}
         >
           <ShieldAlert className="w-4 h-4" />
-          <span>Verdict & Summary</span>
+          <span>Summary</span>
           {findings.length > 0 && (
             <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200">
               {findings.length}
@@ -375,7 +372,7 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
           }`}
         >
           <BookOpen className="w-4 h-4" />
-          <span>Claims & Proof ({claims.length})</span>
+          <span>Claims & Sources ({claims.length})</span>
         </button>
 
         <button
@@ -387,7 +384,7 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
           }`}
         >
           <Clock className="w-4 h-4" />
-          <span>Timeline Analysis ({timelineEvents.length})</span>
+          <span>Timeline ({timelineEvents.length})</span>
         </button>
 
         <button
@@ -411,7 +408,7 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
           }`}
         >
           <FlaskConical className="w-4 h-4 text-purple-600" />
-          <span>Scenario Simulator</span>
+          <span>What if?</span>
         </button>
 
         <button
@@ -423,7 +420,7 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
           }`}
         >
           <Cpu className="w-4 h-4 text-indigo-600" />
-          <span>AI Investigator</span>
+          <span>Ask about this case</span>
         </button>
 
         <button
@@ -447,17 +444,14 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
           }`}
         >
           <FileText className="w-4 h-4" />
-          <span>Official Report</span>
+          <span>Report</span>
         </button>
       </div>
 
       {/* Tab Panels */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          <AutomatedAuthenticityVerdictCard
-            analysis={autoAuth}
-            onNavigateTab={(tab) => setActiveTab(tab)}
-          />
+          <SourceResearchPanel caseId={caseId} content={caseData.originalInput} kind={caseData.kind} onSourcesSaved={loadCase} />
 
           <TrustDebtPanel
             assessment={trustDebt}
@@ -469,15 +463,11 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
               <div>
                 <h3 className="font-bold text-sm text-ink-primary dark:text-neutral-100 mb-3 flex items-center gap-2">
                   <ShieldAlert className="w-4 h-4 text-forest-700 dark:text-forest-400" />
-                  <span>Explainable Heuristic Findings ({findings.length})</span>
+                  <span>Local warning signs ({findings.length})</span>
                 </h3>
                 <FindingsList findings={findings} />
               </div>
 
-              <MissingProofPanel
-                kind={caseData.kind}
-                onAddEvidencePrompt={() => setActiveTab('evidence')}
-              />
             </div>
 
             <div className="space-y-6">
@@ -496,18 +486,18 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
                 <div className="bg-white dark:bg-surface-darkCard rounded-2xl border border-surface-border dark:border-surface-darkBorder p-5 shadow-sm space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-ink-primary dark:text-neutral-100">
-                      Automated Verification Suite
+                      Local checks
                     </span>
                     <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-semibold">
-                      Evaluated
+                      Completed
                     </span>
                   </div>
                   <p className="text-xs text-ink-secondary dark:text-neutral-400">
-                    Sondera cross-referenced message urgency, known telecom sender headers, statutory utility laws, and banking KYC circulars.
+                    These checks look for suspicious wording and URL structure. They do not search the web or confirm whether a claim is true.
                   </p>
                   <div className="pt-2 border-t border-surface-border/50">
                     <span className="text-[11px] text-ink-muted block">
-                      To see raw rule IDs and regex check records, switch to <strong>Technical Mode</strong> in the top navbar.
+                      Online research is a separate, optional step above. It sends the message to Google only when you choose “Research this message.”
                     </span>
                   </div>
                 </div>

@@ -46,7 +46,7 @@ const REPORT_SECTIONS = [
   { id: 'content', label: 'Examined Content' },
   { id: 'checks', label: 'Checks Registry' },
   { id: 'findings', label: 'Observed Findings' },
-  { id: 'debt', label: 'Trust Debt & Gaps' },
+  { id: 'debt', label: 'Evidence coverage' },
   { id: 'evidence', label: 'Evidence Register' },
   { id: 'timeline', label: 'Context Chronology' },
   { id: 'notes', label: 'Case Notes' },

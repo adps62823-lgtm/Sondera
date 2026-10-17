@@ -29,13 +29,13 @@ export const TrustDebtPanel: React.FC<TrustDebtPanelProps> = ({
           </div>
           <div>
             <h3 className="font-bold text-sm text-ink-primary dark:text-neutral-100 flex items-center gap-2">
-              Trust Debt Analysis
-              <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${badgeColor}`}>
-                {assessment.level.toUpperCase()}
+              Evidence coverage
+              <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${assessment.metrics.totalClaims === 0 ? 'bg-neutral-100 text-neutral-700 border-neutral-300 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700' : badgeColor}`}>
+                {assessment.metrics.totalClaims === 0 ? 'No claims reviewed' : assessment.level.toUpperCase()}
               </span>
             </h3>
             <p className="text-xs text-ink-secondary dark:text-neutral-400">
-              The explanatory gap between circulation confidence and independent supporting proof.
+              Tracks whether specific claims have sources attached and reviewed.
             </p>
           </div>
         </div>
@@ -46,7 +46,7 @@ export const TrustDebtPanel: React.FC<TrustDebtPanelProps> = ({
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-forest-600 hover:bg-forest-700 text-white text-xs font-medium transition self-start sm:self-auto"
           >
             <Lightbulb className="w-3.5 h-3.5" />
-            <span>Missing-Proof Finder</span>
+            <span>Add claims and sources</span>
           </button>
         )}
       </div>
@@ -96,7 +96,7 @@ export const TrustDebtPanel: React.FC<TrustDebtPanelProps> = ({
         <div className="pt-2 border-t border-surface-border/50 dark:border-surface-darkBorder/50">
           <h5 className="text-xs font-semibold text-forest-800 dark:text-forest-300 mb-1.5 flex items-center gap-1.5">
             <ArrowRight className="w-3.5 h-3.5 text-forest-600 dark:text-forest-400" />
-            <span>Steps to Reduce Trust Debt</span>
+          <span>Next steps</span>
           </h5>
           <ul className="space-y-1 text-xs text-ink-secondary dark:text-neutral-300">
             {assessment.recommendedSteps.map((s, i) => (
@@ -110,7 +110,7 @@ export const TrustDebtPanel: React.FC<TrustDebtPanelProps> = ({
       )}
 
       <div className="text-[10px] text-ink-muted dark:text-neutral-500 italic">
-        * Trust Debt is a descriptive explanatory framework mapping evidence gaps. It is not an algorithmic fraud probability.
+        Source links found online are saved as unreviewed until you inspect and connect them to a claim.
       </div>
     </div>
   );

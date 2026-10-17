@@ -2,31 +2,31 @@
 
 > **Tagline:** *Know what you know. Find what you don’t.*  
 > **Event Context:** HACKCOM ’26 — Theme: **“Building a Safer Digital World”**  
-> **Operating Constraint:** ₹0 budget; zero paid API dependency; 100% local-first privacy.
+> **Operating Constraint:** ₹0 budget; local checks work without a key; optional online research uses a free-tier API key.
 
 ---
 
 ## 1. What is Sondera?
 
-Sondera is a privacy-conscious digital investigation workspace. Rather than stamping messages with a binary, overconfident "Safe" or "Scam" verdict, Sondera structures suspicious messages, URLs, and viral claims into an explainable investigation case.
+Sondera helps people check suspicious messages, links, and viral claims. It starts with local warning-sign checks, then can search the live web and compare the claim with cited pages so the user can see what is supported, contradicted, or still unknown.
 
-It breaks down observable indicators, transparently discloses which checks ran and which did not, computes the **Trust Debt** between circulated claims and independent proof, allows investigators to organize evidence, and outputs a durable, share-safe **Decision Receipt**.
+It explains local warning signs, searches current web sources when asked, displays returned source links, and keeps the research in a reviewable case.
 
 ---
 
 ## 2. Core Feature Suite
 
 ### 🔍 Investigation & Intake
-- **Deterministic Heuristic Engine:** Pinpoints urgency cues, OTP requests, unusual payment methods, impersonation, prizes, and forwarding pressure with matched text snippets.
+- **Local Warning Checks:** Pinpoints urgency cues, OTP requests, unusual payment methods, impersonation, prizes, and forwarding pressure with matched text snippets. These signals do not verify whether a claim is true.
+- **Web Research (Gemini + Google Search):** Optional, user-started research compares the submitted content with live sources and displays the returned links. Source links are saved as unreviewed until a person checks them. Requires a free Google AI Studio API key.
 - **Safe Syntactic URL Parser:** Evaluates hostname structure, the misleading user-info `@` trick, IP address hosts, punycode IDNs, shorteners, and abnormal ports **without outbound network requests**.
 - **Transparent Checks Registry:** Strictly discloses which checks executed, which were omitted, and which are unavailable.
 
-### ⚖️ The Signature Conceptual Layer
-- **Trust Debt Engine:** Dynamically calculates the explanatory gap between viral confidence and primary independent evidence.
+### Case Tools
+- **Evidence Coverage:** Shows whether claims and reviewed sources have been connected.
 - **What-If Scenario Lab:** Simulates hypothetical corroborations or debunk advisories in strict in-memory isolation, with optional 1-click confirmation to import into the real case.
-- **Context Clock & Temporal Anomaly Detector:** Chronological milestones separating event, publication, receipt, and check dates, with automatic warnings for recycled, context-stripped historical circulars.
-- **Interactive Trust Graph:** Visual node canvas connecting Cases $\rightarrow$ Findings $\rightarrow$ Claims $\rightarrow$ Evidence Items (`supports`, `contradicts`, `contextualises`, `mentions`), with an interactive node inspector drawer and accessible table fallback.
-- **Missing-Proof Finder:** Verification checklist prompting users to confirm domain ownership, primary press releases, and OTP policies.
+- **Timeline:** Records event, publication, receipt, and check dates; flags conflicts between entered dates.
+- **Evidence Map:** Connects cases, claims, warning signs, and source links, with an accessible table view.
 
 ### 🚨 Emergency & Threat Defense Suite
 - **Emergency Help ("I Clicked or Shared"):** Step-by-step incident response playbook for money transfers, OTP disclosures, entered passwords, and remote app installations, featuring a one-click **Formal Incident Report Generator** for banks and the 1930 Cyber Helpline.
@@ -46,8 +46,9 @@ It breaks down observable indicators, transparently discloses which checks ran a
 - **Does NOT guarantee safety:** A clean scan means no static rule matched; it does not prove authenticity.
 - **Does NOT treat HTTPS as proof of legitimacy:** Anyone can acquire free SSL certificates.
 - **Does NOT treat repetition as independent confirmation:** 10 forwards are treated as 1 unverified copy.
-- **Does NOT upload user input to external AI models or cloud backends:** All analysis runs in the browser.
-- **Does NOT invent fraud probabilities or confidence percentages:** Replaced with categorical, explainable indicators.
+- **Local checks stay on-device.** If the user chooses web research or AI chat, the relevant message or question is sent to Google Gemini; web research also uses Google Search. The API key is stored in browser local storage. Do not submit sensitive personal content.
+- The optional local text model downloads model files from Hugging Face on first use.
+- Local warning checks do not certify authenticity. AI summaries and search results can be wrong; inspect the cited pages.
 
 ---
 
@@ -93,11 +94,11 @@ npm run preview
 | Safe Offline URL Parser | **Implemented** | User-info `@` trick, IP host, punycode, shorteners, ports |
 | Transparent Check Registry | **Implemented** | Honest disclosure of completed vs omitted checks |
 | Case Management & Autosave | **Implemented** | IndexedDB with debounced saves, tags, and duplication |
-| Trust Debt Evaluation | **Implemented** | Explanatory gap analysis based on claims and sources |
+| Source-backed web research | **Implemented** | Optional Gemini 2.5 Flash with Google Search; returns a summary and source URLs |
+| Evidence Coverage | **Implemented** | Shows whether claims and reviewed sources are connected |
 | What-If Scenario Lab | **Implemented** | In-memory hypothetical simulations with import option |
-| Context Clock & Anomaly Check | **Implemented** | Chronology milestones with temporal context-stripping alerts |
+| Timeline | **Implemented** | Records dates and flags entered chronology conflicts |
 | Trust Graph | **Implemented** | Interactive visual node canvas + accessible table |
-| Missing-Proof Finder | **Implemented** | Interactive verification checklist |
 | Decision Receipt Generator | **Implemented** | Markdown export, print-to-PDF, section selector |
 | Share-Safe Redaction Engine | **Implemented** | Interactive modal for regex masking of PII |
 | Emergency Response Wizard | **Implemented** | Incident containment playbook & bank/police report generator |

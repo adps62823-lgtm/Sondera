@@ -12,7 +12,6 @@ import {
   ReportSnapshot,
 } from '../types/domain';
 import { analyzeContent, ENGINE_VERSION } from '../core/engine/analysis-engine';
-import { runAutomatedAuthenticityAnalysis } from '../core/engine/auto-authenticity-engine';
 
 export async function createCase(
   input: string,
@@ -25,21 +24,18 @@ export async function createCase(
   const caseId = `case-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
   const now = new Date().toISOString();
 
-  // Run deterministic analysis and automated fact-checking intelligence
+  // Run local warning-sign checks only. Claim truth and source verification happen separately.
   const { output } = analyzeContent(input, kind, caseId, context);
-  const autoAuth = runAutomatedAuthenticityAnalysis(input, kind, caseId, context);
 
   // Auto-generate title if none provided
   const derivedTitle =
     title && title.trim()
       ? title.trim()
-      : autoAuth.threatTitle
-      ? autoAuth.threatTitle
       : input.length > 50
       ? input.substring(0, 47).replace(/[\r\n]+/g, ' ') + '...'
       : input.replace(/[\r\n]+/g, ' ') || 'Untitled Investigation';
 
-  const tags = Array.from(new Set([kind, autoAuth.detectedThreatCategory, autoAuth.overallVerdict]));
+  const tags = [kind];
 
   const newCase: InvestigationCase = {
     id: caseId,
@@ -80,44 +76,14 @@ export async function createCase(
         await db.checks.bulkAdd(output.checks);
       }
 
-      // Automatically store extracted claims
-      if (autoAuth.claims.length > 0) {
-        await db.claims.bulkAdd(autoAuth.claims);
-      }
-
-      // Automatically store authoritative regulatory evidence
-      if (autoAuth.evidence.length > 0) {
-        await db.evidence.bulkAdd(autoAuth.evidence);
-      }
-
-      // Automatically store relational mapping (supports / refutes)
-      if (autoAuth.relations.length > 0) {
-        await db.relations.bulkAdd(autoAuth.relations);
-      }
-
-      // Add timeline manipulation events
-      if (autoAuth.timelineEvents.length > 0) {
-        await db.timelineEvents.bulkAdd(autoAuth.timelineEvents);
-      } else {
-        await db.timelineEvents.add({
-          id: `evt-intake-${Date.now()}`,
-          caseId,
-          kind: 'received',
-          label: 'Case content received and logged in local workspace',
-          occurredAt: receivedDate || now,
-          dateBasis: receivedDate ? 'user_entered' : 'unknown',
-          notes: context ? `Context: ${context}` : undefined,
-        });
-      }
-
-      // Store automated AI debrief note
-      await db.notes.add({
-        id: `note-ai-${Date.now()}`,
+      await db.timelineEvents.add({
+        id: `evt-intake-${Date.now()}`,
         caseId,
-        title: 'Automated Authenticity Assessment',
-        body: `### 🤖 Automated Authenticity Assessment\n\n**Verdict:** ${autoAuth.verdictLabel} (Authenticity Score: ${autoAuth.authenticityScore}/100)\n\n**Executive Summary:**\n${autoAuth.aiExplanation.summary}\n\n**Psychological Triggers Exploited:**\n${autoAuth.aiExplanation.psychologicalTriggers.map((t) => `- ${t}`).join('\n')}\n\n**Critical Omissions Identified:**\n${autoAuth.aiExplanation.whatIsMissing.map((m) => `- ${m}`).join('\n')}\n\n**Official vs Received Comparison:**\n${autoAuth.aiExplanation.authenticStandardComparison.map((c) => `- **${c.aspect}:** Standard: *${c.officialStandard}* | Received: *${c.whatAttackerDid}*`).join('\n')}`,
-        createdAt: now,
-        updatedAt: now,
+        kind: 'received',
+        label: 'Content received',
+        occurredAt: receivedDate || now,
+        dateBasis: receivedDate ? 'user_entered' : 'unknown',
+        notes: context ? `Context: ${context}` : undefined,
       });
     }
   );
@@ -195,13 +161,9 @@ export async function reanalyzeCase(caseId: string) {
 
   const now = new Date().toISOString();
   const { output } = analyzeContent(c.originalInput, c.kind, caseId, c.userContext);
-  const autoAuth = runAutomatedAuthenticityAnalysis(c.originalInput, c.kind, caseId, c.userContext);
-
-  const existingClaims = await db.claims.where('caseId').equals(caseId).count();
-
   await db.transaction(
     'rw',
-    [db.cases, db.findings, db.checks, db.claims, db.evidence, db.relations, db.timelineEvents, db.notes],
+    [db.cases, db.findings, db.checks],
     async () => {
       await db.findings.where('caseId').equals(caseId).delete();
       await db.checks.where('caseId').equals(caseId).delete();
@@ -211,14 +173,6 @@ export async function reanalyzeCase(caseId: string) {
       }
       if (output.checks.length > 0) {
         await db.checks.bulkAdd(output.checks);
-      }
-
-      // If no claims existed yet, populate them
-      if (existingClaims === 0) {
-        if (autoAuth.claims.length > 0) await db.claims.bulkAdd(autoAuth.claims);
-        if (autoAuth.evidence.length > 0) await db.evidence.bulkAdd(autoAuth.evidence);
-        if (autoAuth.relations.length > 0) await db.relations.bulkAdd(autoAuth.relations);
-        if (autoAuth.timelineEvents.length > 0) await db.timelineEvents.bulkAdd(autoAuth.timelineEvents);
       }
 
       await db.cases.update(caseId, {

@@ -142,10 +142,10 @@ export const LocalNeuralAiPanel: React.FC<LocalNeuralAiPanelProps> = ({
       if (geminiApiKey) {
         // Live Gemini API Call
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiApiKey },
             body: JSON.stringify({
               contents: [
                 {
@@ -239,22 +239,22 @@ Provide a concise, practical, direct answer in 2-3 short paragraphs with clear b
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="font-bold text-base text-ink-primary dark:text-neutral-100">
-                AI Safety Investigator Studio
+                Case assistant
               </h3>
               {geminiApiKey ? (
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200 font-bold border border-emerald-300 dark:border-emerald-800 flex items-center gap-1">
                   <Sparkles className="w-3 h-3 text-emerald-600" />
-                  Gemini 1.5 Flash Connected
+                  Gemini 2.5 Flash ready
                 </span>
               ) : (
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-200 font-bold border border-indigo-200 dark:border-indigo-900 flex items-center gap-1">
                   <ShieldCheck className="w-3 h-3 text-indigo-600" />
-                  100% In-Browser Privacy Mode
+                  Offline guidance
                 </span>
               )}
             </div>
             <p className="text-xs text-ink-secondary dark:text-neutral-400 mt-0.5">
-              Dual-engine AI: Local WebGPU/WASM MobileBERT tensor classification + interactive investigative reasoning.
+              Optional tools. The local classifier is a downloaded text model; offline replies use keyword-matched guidance. Gemini chat sends the case text and your question to Google.
             </p>
           </div>
         </div>
@@ -268,52 +268,52 @@ Provide a concise, practical, direct answer in 2-3 short paragraphs with clear b
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-surface-border dark:border-surface-darkBorder hover:bg-surface-muted dark:hover:bg-surface-darkMuted text-xs font-medium text-ink-secondary dark:text-neutral-300 transition"
           >
             <Key className="w-3.5 h-3.5" />
-            <span>{geminiApiKey ? 'API Key Configured' : 'Connect Gemini API (Optional)'}</span>
+            <span>{geminiApiKey ? 'Change Gemini key' : 'Add Gemini key (optional)'}</span>
           </button>
         </div>
       </div>
 
-      {/* AI Processing Architecture Explanation Banner */}
+      {/* Clear disclosure of local and online steps */}
       <div className="p-4 rounded-2xl bg-surface-muted dark:bg-surface-darkMuted border border-surface-border/60 dark:border-surface-darkBorder/60 space-y-2">
         <span className="text-[10px] font-bold uppercase tracking-wider text-ink-muted flex items-center gap-1.5">
           <Info className="w-3.5 h-3.5 text-indigo-600" />
-          <span>Understanding Sondera's 3-Layer Verification Architecture</span>
+          <span>What runs locally and online</span>
         </span>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
           <div className="p-2.5 rounded-xl bg-white dark:bg-surface-darkCard border border-surface-border/40">
             <span className="font-bold text-forest-800 dark:text-forest-300 block mb-1">
-              1. Deterministic Heuristics
+              1. Local warning rules
             </span>
             <p className="text-[11px] text-ink-secondary dark:text-neutral-400">
-              Zero-latency syntax checks: punycode detection, user-info @ trick, statutory notice gaps, urgency regex.
+              Pattern checks for urgency, credential requests, and suspicious URL structure. They do not verify claims.
             </p>
           </div>
           <div className="p-2.5 rounded-xl bg-white dark:bg-surface-darkCard border border-surface-border/40">
             <span className="font-bold text-indigo-800 dark:text-indigo-300 block mb-1">
-              2. Local Neural Engine
+              2. Optional local text model
             </span>
             <p className="text-[11px] text-ink-secondary dark:text-neutral-400">
-              MobileBERT zero-shot natural language inference via Transformers.js in WebGPU/WASM right in your browser.
+              Downloads model files on first use, then classifies text on this device. This is separate from web research.
             </p>
           </div>
           <div className="p-2.5 rounded-xl bg-white dark:bg-surface-darkCard border border-surface-border/40">
             <span className="font-bold text-purple-800 dark:text-purple-300 block mb-1">
-              3. Interactive AI Investigator
+              3. Gemini chat
             </span>
             <p className="text-[11px] text-ink-secondary dark:text-neutral-400">
-              Conversational synthesis and emergency containment Q&A using built-in knowledge or Gemini Cloud LLM.
+              Sends the case text and your question to Google for a generated answer. No search grounding in this chat.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Section 1: Interactive AI Investigator Consultation Chat */}
+      {/* Case assistant chat */}
       <div className="p-5 rounded-2xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/20 dark:bg-indigo-950/20 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bot className="w-4 h-4 text-indigo-600" />
             <h4 className="text-sm font-bold text-ink-primary dark:text-neutral-100">
-              Ask the AI Investigator About This Case
+              Ask about this case
             </h4>
           </div>
           <span className="text-[10px] text-ink-muted dark:text-neutral-400">
@@ -394,7 +394,7 @@ Provide a concise, practical, direct answer in 2-3 short paragraphs with clear b
           {isChatLoading && (
             <div className="flex items-center gap-2 text-xs text-ink-muted p-2">
               <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
-              <span>AI Investigator is analyzing the incident...</span>
+              <span>Preparing an answer...</span>
             </div>
           )}
         </div>

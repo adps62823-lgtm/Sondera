@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ExternalLink, Globe2, LoaderCircle, Save, SearchCheck } from 'lucide-react';
 import { db } from '../../services/db';
 
-type WebCitation = { title: string; url: string };
+type WebCitation = { title: string; url: string; provider?: string; snippet?: string };
 
 interface SourceResearchPanelProps {
   caseId: string;
@@ -117,7 +117,10 @@ export const SourceResearchPanel: React.FC<SourceResearchPanelProps> = ({ caseId
         <div className="whitespace-pre-wrap text-sm leading-relaxed text-ink-primary dark:text-neutral-100">{answer}</div>
         {citations.length > 0 ? <div className="rounded-xl bg-surface-muted dark:bg-surface-darkMuted p-3 space-y-2">
           <h3 className="text-xs font-bold text-ink-primary dark:text-neutral-100">Sources to review</h3>
-          <ul className="space-y-1.5">{citations.map((citation) => <li key={citation.url}><a href={citation.url} target="_blank" rel="noreferrer" className="inline-flex items-start gap-1 text-xs text-blue-700 dark:text-blue-300 underline break-all"><ExternalLink className="w-3 h-3 shrink-0 mt-0.5" />{citation.title}</a></li>)}</ul>
+          <ul className="space-y-2">{citations.map((citation) => <li key={citation.url}>
+            <a href={citation.url} target="_blank" rel="noreferrer" className="inline-flex items-start gap-1 text-xs text-blue-700 dark:text-blue-300 underline break-all"><ExternalLink className="w-3 h-3 shrink-0 mt-0.5" />{citation.title}</a>
+            <div className="ml-4 text-[10px] text-ink-muted">{citation.provider || new URL(citation.url).hostname}{citation.snippet ? ` · ${citation.snippet}` : ''}</div>
+          </li>)}</ul>
           <div className="flex items-center gap-2 pt-1">
             <button type="button" onClick={saveSources} disabled={saved} className="inline-flex items-center gap-1 rounded-lg border border-forest-600 px-3 py-1.5 text-xs font-semibold text-forest-800 dark:text-forest-200 disabled:opacity-50"><Save className="w-3 h-3" /> Save to case</button>
             {saved && <span className="text-xs text-forest-800 dark:text-forest-200">Saved for review.</span>}

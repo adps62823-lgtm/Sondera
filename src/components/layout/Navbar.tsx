@@ -220,7 +220,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     ? 'bg-white dark:bg-surface-darkCard text-indigo-800 dark:text-indigo-200 shadow-xs'
                     : 'text-ink-secondary dark:text-neutral-400 hover:text-ink-primary'
                 }`}
-                title="Technical Mode: Detailed URL parsing, ports, WebGPU tensor metrics"
+                title="Technical Mode: detailed URL checks and technical information"
               >
                 <span>⚙️ Technical</span>
               </button>

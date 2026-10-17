@@ -18,7 +18,7 @@ Open the local URL printed by Vite. Online source research runs through the depl
 3. Redeploy after setting the variable. Vercel applies environment changes to new deployments.
 4. Open a case and use **Search current sources** to check the complete research flow.
 
-The server function at `/api/research` sends submitted text to Google Gemini with Google Search grounding. Keep a clear privacy notice in the product and avoid submitting private or sensitive content.
+The `/api/research` and `/api/buddy` functions use the server-side Gemini key. They combine Google Search grounding with DuckDuckGo results, Wikipedia's search API, and GDELT news results. For a small set of established news publishers, the server reads public article metadata to provide useful context; it does not crawl arbitrary links. Keep a clear privacy notice in the product and avoid submitting private or sensitive content.
 
 ## Data and limitations
 

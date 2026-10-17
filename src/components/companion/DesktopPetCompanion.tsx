@@ -35,6 +35,7 @@ interface PetMessage {
     modeAction?: AppMode;
   };
   timestamp: string;
+  citations?: Array<{ title: string; url: string; provider?: string }>;
 }
 
 export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
@@ -56,7 +57,7 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
     {
       id: 'msg-welcome',
       sender: 'pet',
-      text: `Hello! I'm **CyBuddy**, your friendly digital safety pet. 🐾\n\nI can help you check suspicious links, explain scams in simple words, or take you anywhere in the app! What would you like help with?`,
+      text: `Hi, I'm **Sonder**. I can help you understand suspicious messages, check current sources, and find the right safety steps. What would you like help with?`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -93,66 +94,43 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
     setMood('thinking');
 
     try {
-      // Local guidance keeps navigation help available without an account or API key.
-      await new Promise((r) => setTimeout(r, 600));
+      const history = [...messages.slice(-10).map((message) => ({
+        role: message.sender === 'user' ? 'user' : 'model',
+        text: message.text,
+      })), { role: 'user', text: q }];
+      const response = await fetch('/api/buddy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history, mode, currentTab }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Sonder could not answer just now.');
       const lower = q.toLowerCase();
-      let reply = '';
-      let actionBtn: PetMessage['actionButton'] = undefined;
-
-      if (lower.includes('link') || lower.includes('url') || lower.includes('website')) {
-        reply = `You can check any web link or UPI QR code safely using our **Link Checker**. It examines hidden redirects and scam domains without actually loading the website!`;
-        actionBtn = { label: 'Go to Link Checker', tab: 'url_lab' };
-        setMood('happy');
-      } else if (lower.includes('sms') || lower.includes('message') || lower.includes('verify')) {
-        reply = `To inspect an SMS, WhatsApp forward, or email, click **Verify Message**. Sondera will automatically identify the scam type and testable claims!`;
-        actionBtn = { label: 'Go to Verify Message', tab: 'investigate' };
-        setMood('happy');
-      } else if (
-        lower.includes('emergency') ||
-        lower.includes('clicked') ||
-        lower.includes('compromised') ||
-        lower.includes('lost money') ||
-        lower.includes('otp')
-      ) {
-        reply = `🚨 **Don't panic! Here are the 3 immediate steps:**\n1. Disconnect internet (turn on Airplane mode).\n2. If you entered card/NetBanking details, call your bank to freeze them immediately.\n3. Dial **1930** (National Cyber Helpline).\n\nOpen our Emergency Guide below for step-by-step containment:`;
-        actionBtn = { label: 'Open SOS Emergency Guide', tab: 'emergency' };
-        setMood('alert');
-      } else if (lower.includes('simple mode') || lower.includes('technical mode') || lower.includes('mode')) {
-        if (mode === 'simple') {
-          reply = `You are currently in **Simple Mode**, which hides complex port numbers, regex rules, and developer terms. Would you like to switch to **Technical Mode**?`;
-          actionBtn = { label: 'Switch to Technical Mode', modeAction: 'technical' };
-        } else {
-          reply = `You are currently in **Technical Mode**, showing raw syntactic tokens, ports, and WebGPU metrics. Would you like to switch to **Simple Mode**?`;
-          actionBtn = { label: 'Switch to Simple Mode', modeAction: 'simple' };
-        }
-        setMood('vigilant');
-      } else if (lower.includes('quiz') || lower.includes('learn') || lower.includes('game') || lower.includes('gym')) {
-        reply = `Want to sharpen your instincts? Check out our **Safety Quiz** with realistic interactive scenarios!`;
-        actionBtn = { label: 'Open Safety Quiz', tab: 'learn' };
-        setMood('happy');
-      } else if (lower.includes('scam') || lower.includes('threat') || lower.includes('electricity') || lower.includes('kyc')) {
-        reply = `We maintain a comprehensive field guide covering 10 modern scam vectors (Electricity bills, Part-time job scams, India Post customs, etc.) in our **Scam Directory**!`;
-        actionBtn = { label: 'Browse Scam Directory', tab: 'threats' };
-        setMood('vigilant');
-      } else if (lower.includes('privacy') || lower.includes('leak') || lower.includes('habit')) {
-        reply = `You can take our 8-question **Privacy Test** to evaluate your online hygiene and receive actionable security recommendations!`;
-        actionBtn = { label: 'Start Privacy Test', tab: 'privacy' };
-        setMood('happy');
-      } else {
-        reply = `I'm right here to help! You can ask me how to identify fake messages, what to do if you clicked a suspicious link, or ask me to take you anywhere in Sondera.`;
-        setMood('vigilant');
-      }
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `pet-${Date.now()}`,
-          sender: 'pet',
-          text: reply,
-          actionButton: actionBtn,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        },
-      ]);
+      let actionBtn: PetMessage['actionButton'];
+      if (lower.includes('mode')) actionBtn = { label: `Switch to ${mode === 'simple' ? 'Technical' : 'Simple'} Mode`, modeAction: mode === 'simple' ? 'technical' : 'simple' };
+      else if (/\b(link|url|website)\b/.test(lower)) actionBtn = { label: 'Open Link Checker', tab: 'url_lab' };
+      else if (/\b(sms|message|verify|claim)\b/.test(lower)) actionBtn = { label: 'Check a message', tab: 'investigate' };
+      else if (/\b(emergency|clicked|compromised|lost money|otp)\b/.test(lower)) actionBtn = { label: 'Open Emergency Help', tab: 'emergency' };
+      else if (/\b(quiz|learn|game)\b/.test(lower)) actionBtn = { label: 'Open Safety Quiz', tab: 'learn' };
+      else if (/\b(scam|threat|electricity|kyc)\b/.test(lower)) actionBtn = { label: 'Browse Scam Guide', tab: 'threats' };
+      else if (/\b(privacy|leak|habit)\b/.test(lower)) actionBtn = { label: 'Open Privacy Check', tab: 'privacy' };
+      setMessages((prev) => [...prev, {
+        id: `pet-${Date.now()}`,
+        sender: 'pet',
+        text: typeof data.answer === 'string' ? data.answer : 'I could not form an answer. Please try again.',
+        citations: Array.isArray(data.citations) ? data.citations : [],
+        actionButton: actionBtn,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      }]);
+      setMood(/emergency|clicked|compromised|lost money|otp/i.test(q) ? 'alert' : 'happy');
+    } catch (error) {
+      setMessages((prev) => [...prev, {
+        id: `pet-error-${Date.now()}`,
+        sender: 'pet',
+        text: error instanceof Error ? error.message : 'Sonder could not answer just now. Please try again.',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      }]);
+      setMood('vigilant');
     } finally {
       setIsTyping(false);
     }
@@ -200,8 +178,8 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
             setBubbleText(null);
           }}
           className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-forest-800 to-forest-600 text-white shadow-xl hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center relative group border-2 border-forest-400/30"
-          title="Open CyBuddy - Your Safety Pet Companion"
-          aria-label="Open CyBuddy Assistant"
+          title="Open Sonder assistant"
+          aria-label="Open Sonder assistant"
         >
           {/* Animated Eyes / Mascot Avatar */}
           <div className="relative flex flex-col items-center justify-center">
@@ -242,14 +220,14 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <h4 className="font-bold text-xs tracking-wide">CyBuddy Companion</h4>
+                  <h4 className="font-bold text-xs tracking-wide">Sonder</h4>
                   <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono bg-forest-800 text-forest-200">
                     {mode.toUpperCase()} MODE
                   </span>
                 </div>
                 <p className="text-[10px] text-forest-200/80">
                   {mood === 'thinking'
-                    ? 'Thinking...'
+                    ? 'Searching and preparing an answer…'
                     : mood === 'alert'
                     ? 'Security Alert active'
                     : 'Ready to help'}
@@ -278,8 +256,10 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
           {!isMinimized && (
             <>
               {/* Quick Prompt Carousel */}
-              <div className="px-3 py-2 bg-surface-muted dark:bg-surface-darkMuted border-b border-surface-border/50 dark:border-surface-darkBorder/50 flex items-center gap-1.5 overflow-x-auto text-[11px] shrink-0">
-                <span className="text-ink-muted shrink-0 text-[10px]">Ask:</span>
+              <div className="px-3 py-2 bg-surface-muted dark:bg-surface-darkMuted border-b border-surface-border/50 dark:border-surface-darkBorder/50 flex flex-col gap-2 shrink-0">
+                <p className="text-[10px] text-ink-muted">Sonder uses online sources to answer. Don’t share passwords, one-time codes, or private information.</p>
+                <div className="flex items-center gap-1.5 overflow-x-auto text-[11px]">
+                <span className="text-ink-muted shrink-0 text-[10px]">Try:</span>
                 <button
                   onClick={() => handleSendMessage('Where do I check a suspicious link?')}
                   className="px-2.5 py-0.5 rounded-full bg-white dark:bg-surface-darkCard border border-surface-border hover:bg-surface-light text-ink-primary dark:text-neutral-200 whitespace-nowrap"
@@ -298,6 +278,7 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
                 >
                   Toggle Mode
                 </button>
+                </div>
               </div>
 
               {/* Chat Message History */}
@@ -319,7 +300,17 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
                           : 'bg-surface-muted dark:bg-surface-darkMuted text-ink-primary dark:text-neutral-200 border border-surface-border/50 rounded-bl-xs'
                       }`}
                     >
-                      <div className="whitespace-pre-wrap">{m.text}</div>
+                  <div className="whitespace-pre-wrap">{m.text}</div>
+                  {m.citations && m.citations.length > 0 && (
+                    <div className="border-t border-surface-border/60 dark:border-surface-darkBorder/60 pt-2 space-y-1">
+                      <p className="text-[10px] font-semibold">Sources</p>
+                      {m.citations.map((citation) => (
+                        <a key={citation.url} href={citation.url} target="_blank" rel="noreferrer" className="block text-[10px] text-blue-700 dark:text-blue-300 underline break-all">
+                          {citation.title}{citation.provider ? ` · ${citation.provider}` : ''}
+                        </a>
+                      ))}
+                    </div>
+                  )}
 
                       {/* Action Button if attached */}
                       {m.actionButton && (
@@ -350,7 +341,7 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
                 {isTyping && (
                   <div className="flex items-center gap-2 text-[11px] text-ink-muted p-2">
                     <span className="animate-spin text-sm">🐾</span>
-                    <span>CyBuddy is thinking...</span>
+                    <span>Sonder is searching and preparing an answer…</span>
                   </div>
                 )}
                 <div ref={chatBottomRef} />
@@ -363,7 +354,7 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="Ask CyBuddy anything..."
+                  placeholder="Ask Sonder…"
                   className="flex-1 px-3 py-2 rounded-xl border border-surface-border dark:border-surface-darkBorder bg-white dark:bg-surface-darkCard text-xs text-ink-primary dark:text-neutral-100 focus:outline-none focus:border-forest-600"
                 />
                 <button

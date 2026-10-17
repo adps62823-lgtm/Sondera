@@ -6,7 +6,7 @@ Cases, claims, evidence, relations, findings, timelines, notes, reports, prefere
 
 ## Online source research
 
-Online research is optional and starts only when a user selects **Search current sources**. The selected message or link is sent from the browser to Sondera's `/api/research` endpoint. The endpoint uses the server-side `GEMINI_API_KEY` environment variable to request a response from Google Gemini with Google Search grounding. The key is never sent to the browser or stored in browser storage. Google processes the submitted text; do not submit private or sensitive content.
+Online research is optional and starts only when a user selects **Search current sources** or sends a message to Sonder. The selected text or chat conversation is sent from the browser to Sondera's `/api/research` or `/api/buddy` endpoint. These endpoints use the server-side `GEMINI_API_KEY` environment variable to request a response from Google Gemini with Google Search grounding. They also search DuckDuckGo, Wikipedia, and GDELT news; public article metadata is read from a small allowlist of news publishers. The key is never sent to the browser or stored in browser storage. Submitted text is processed by Google and search providers; do not submit private or sensitive content.
 
 Returned source links and summaries are saved locally only when the user chooses to save them. A returned link is a lead for review, not proof that a claim is true.
 

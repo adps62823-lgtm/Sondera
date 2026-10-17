@@ -1,4 +1,4 @@
-import { searchSources, sourceContext } from '../src/server/source-search';
+import { searchSources, sourceContext } from '../src/server/source-search.js';
 
 const jsonHeaders = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' };
 

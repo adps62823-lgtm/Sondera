@@ -82,14 +82,14 @@ async function handler(request: Request): Promise<Response> {
         : message.text;
       return { role: message.role, parts: [{ text }] };
     });
-    const upstream = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent', {
+    const upstream = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: `${persona}\n\nRequired response style: ${responseStyle}` }] },
         contents,
         tools: [{ google_search: {} }],
-        generationConfig: { temperature: 0.45, maxOutputTokens: 1000 },
+        generationConfig: { maxOutputTokens: 1000, thinkingConfig: { thinkingLevel: 'low' } },
       }),
       signal: AbortSignal.timeout(25_000),
     });

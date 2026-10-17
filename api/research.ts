@@ -18,7 +18,7 @@ function researchStream(run: (emit: (data: Record<string, unknown>) => void) => 
   return new Response(stream, { headers: { 'Content-Type': 'application/x-ndjson; charset=utf-8', 'Cache-Control': 'no-store' } });
 }
 
-export default async function handler(request: Request): Promise<Response> {
+async function handler(request: Request): Promise<Response> {
   if (request.method !== 'POST') return json(405, { error: 'Method not allowed.' });
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return json(503, { error: 'Online research is temporarily unavailable.' });
@@ -87,3 +87,5 @@ export default async function handler(request: Request): Promise<Response> {
     emit({ type: 'complete', answer, citations: Array.from(unique.values()), activity, mode });
   });
 }
+
+export default { fetch: handler };

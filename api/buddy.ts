@@ -19,7 +19,7 @@ function eventStream(run: (emit: (data: Record<string, unknown>) => void) => Pro
   return new Response(stream, { headers: { 'Content-Type': 'application/x-ndjson; charset=utf-8', 'Cache-Control': 'no-store' } });
 }
 
-export default async function handler(request: Request): Promise<Response> {
+async function handler(request: Request): Promise<Response> {
   if (request.method !== 'POST') return json(405, { error: 'Method not allowed.' });
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return json(503, { error: 'Sonder is temporarily unavailable. Please try again later.' });
@@ -105,3 +105,5 @@ export default async function handler(request: Request): Promise<Response> {
     emit({ type: 'complete', answer, citations: Array.from(unique.values()).slice(0, 10), activity });
   });
 }
+
+export default { fetch: handler };

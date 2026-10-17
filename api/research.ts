@@ -18,6 +18,20 @@ function researchStream(run: (emit: (data: Record<string, unknown>) => void) => 
   return new Response(stream, { headers: { 'Content-Type': 'application/x-ndjson; charset=utf-8', 'Cache-Control': 'no-store' } });
 }
 
+async function geminiFailure(response: Response, apiKey: string, mode: 'simple' | 'technical'): Promise<string> {
+  let detail = '';
+  try {
+    const body = await response.json() as { error?: { message?: unknown } };
+    if (typeof body.error?.message === 'string') detail = body.error.message;
+  } catch { /* The provider may return a non-JSON error body. */ }
+  detail = detail.split(apiKey).join('[redacted]').replace(/\s+/g, ' ').slice(0, 240);
+  console.error('[api/research] Gemini request failed', { status: response.status, detail });
+  if (response.status === 429) return 'Online research is temporarily over capacity. Please try again shortly.';
+  if (response.status === 401 || response.status === 403) return 'Google denied online research access. Check the Gemini API key and its restrictions in Vercel.';
+  if (mode === 'technical') return `Gemini returned HTTP ${response.status}${detail ? `: ${detail}` : ''}. Check the GEMINI_API_KEY and Vercel function logs.`;
+  return 'Google could not complete online research. Please check the API setup or try again later.';
+}
+
 async function handler(request: Request): Promise<Response> {
   if (request.method !== 'POST') return json(405, { error: 'Method not allowed.' });
   const apiKey = process.env.GEMINI_API_KEY;
@@ -60,7 +74,7 @@ async function handler(request: Request): Promise<Response> {
       signal: AbortSignal.timeout(25_000),
     });
     if (!upstream.ok) {
-      emit({ type: 'error', error: upstream.status === 429 ? 'Research is busy right now. Please try again shortly.' : 'Research could not be completed. Please try again later.' });
+      emit({ type: 'error', error: await geminiFailure(upstream, apiKey, mode) });
       return;
     }
     const result = await upstream.json() as {

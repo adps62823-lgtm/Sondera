@@ -82,7 +82,7 @@ async function handler(request: Request): Promise<Response> {
         : message.text;
       return { role: message.role, parts: [{ text }] };
     });
-    const upstream = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent', {
+    const upstream = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
       body: JSON.stringify({

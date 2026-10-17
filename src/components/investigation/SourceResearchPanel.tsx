@@ -151,7 +151,7 @@ export const SourceResearchPanel: React.FC<SourceResearchPanelProps> = ({ caseId
       </div>
       {loading && <div className="rounded-xl border border-forest-200 dark:border-forest-800 bg-forest-50/70 dark:bg-forest-950/20 p-3 space-y-2" aria-live="polite">
         <div className="flex items-center gap-2 text-sm font-semibold text-forest-900 dark:text-forest-100"><LoaderCircle className="w-4 h-4 animate-spin" />{researchStage || 'Research in progress…'}</div>
-        <p className="text-xs text-ink-secondary dark:text-neutral-300">Searching Google, DuckDuckGo, Wikipedia, and current news, then comparing returned sources with the submitted content.</p>
+        <p className="text-xs text-ink-secondary dark:text-neutral-300">Searching DuckDuckGo, Wikipedia, and current news, then comparing returned sources with the submitted content.</p>
         {activity.length > 0 && <div className="flex flex-wrap gap-1.5">{activity.map((item) => <span key={item.provider} className="rounded-full bg-white dark:bg-surface-darkCard px-2 py-1 text-[10px]">{item.provider}: {item.resultCount} found</span>)}</div>}
       </div>}
       {error && <p role="alert" className="rounded-lg bg-red-50 dark:bg-red-950/40 p-3 text-sm text-red-800 dark:text-red-200">{error}</p>}
@@ -159,7 +159,7 @@ export const SourceResearchPanel: React.FC<SourceResearchPanelProps> = ({ caseId
         <div className="whitespace-pre-wrap text-sm leading-relaxed text-ink-primary dark:text-neutral-100">{answer}</div>
         <details className="rounded-xl border border-surface-border dark:border-surface-darkBorder bg-surface-muted/60 dark:bg-surface-darkMuted p-3">
           <summary className="cursor-pointer text-xs font-semibold">How this check ran</summary>
-          <p className="mt-2 text-xs text-ink-secondary dark:text-neutral-300">{mode === 'simple' ? 'Sondera searched several sources. Gemini compared those results with the message; these links are leads for you to review.' : `Output mode: ${mode}. Google Gemini 2.5 Flash synthesized the response with Google Search grounding after the independent searches. Result counts come from each provider and may include duplicates.`}</p>
+          <p className="mt-2 text-xs text-ink-secondary dark:text-neutral-300">{mode === 'simple' ? 'Sondera searched several sources. Groq GPT OSS compared those results with the message; these links are leads for you to review.' : `Output mode: ${mode}. Groq openai/gpt-oss-120b assessed the submitted content against DuckDuckGo, Wikipedia, and news results. Counts are per provider and may include duplicates.`}</p>
           <ul className="mt-2 space-y-1 text-xs">{activity.map((item) => <li key={item.provider} className="flex justify-between gap-3"><span>{item.provider}</span><span>{item.resultCount} result{item.resultCount === 1 ? '' : 's'}</span></li>)}</ul>
         </details>
         {citations.length > 0 ? <div className="rounded-xl bg-surface-muted dark:bg-surface-darkMuted p-3 space-y-2">

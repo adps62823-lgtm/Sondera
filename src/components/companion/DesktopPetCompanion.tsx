@@ -348,7 +348,7 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
                   )}
                   {m.activity && m.activity.length > 0 && <details className="border-t border-surface-border/60 dark:border-surface-darkBorder/60 pt-2">
                     <summary className="cursor-pointer text-[10px] font-semibold">Search activity</summary>
-                    <p className="mt-1 text-[10px]">Gemini prepared this reply using Google Search and the listed independent results. Search results can be incomplete or wrong.</p>
+                    <p className="mt-1 text-[10px]">Groq GPT OSS prepared this reply using the listed independent results. Search results can be incomplete or wrong.</p>
                     <ul className="mt-1 space-y-0.5 text-[10px]">{m.activity.map((item) => <li key={item.provider} className="flex justify-between gap-3"><span>{item.provider}</span><span>{item.resultCount} found</span></li>)}</ul>
                   </details>}
 

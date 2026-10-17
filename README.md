@@ -9,16 +9,16 @@ npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite. Online source research runs through the deployment API and requires a server-side `GEMINI_API_KEY` environment variable.
+Open the local URL printed by Vite. Online source research runs through the deployment API and requires a server-side `GROQ_API_KEY` environment variable.
 
 ## Deploy to Vercel
 
 1. Import this repository into Vercel and use the default Vite build settings (`npm run build`, output directory `dist`).
-2. In **Project Settings → Environment Variables**, add `GEMINI_API_KEY` for Production (and Preview if needed). Do not add it to Vite variables, source files, or the browser.
+2. In **Project Settings → Environment Variables**, add `GROQ_API_KEY` for Production (and Preview if needed). Do not add it to Vite variables, source files, or the browser.
 3. Redeploy after setting the variable. Vercel applies environment changes to new deployments.
 4. Open a case and use **Search current sources** to check the complete research flow.
 
-The `/api/research` and `/api/buddy` functions use the server-side Gemini key. They combine Google Search grounding with DuckDuckGo results, Wikipedia's search API, and GDELT news results. For a small set of established news publishers, the server reads public article metadata to provide useful context; it does not crawl arbitrary links. Keep a clear privacy notice in the product and avoid submitting private or sensitive content.
+The `/api/research` and `/api/buddy` functions use Groq's `openai/gpt-oss-120b` model. They combine its analysis with DuckDuckGo results, Wikipedia's search API, and GDELT news results. For a small set of established news publishers, the server reads public article metadata to provide useful context; it does not crawl arbitrary links. Keep a clear privacy notice in the product and avoid submitting private or sensitive content.
 
 ## Data and limitations
 

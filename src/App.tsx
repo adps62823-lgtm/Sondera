@@ -141,7 +141,7 @@ export const App: React.FC = () => {
 
         <Footer />
 
-        {/* Floating Desktop Pet & AI Companion */}
+        {/* Floating help companion */}
         <DesktopPetCompanion
           onNavigate={(tab) => setActiveTab(tab)}
           currentTab={activeTab}

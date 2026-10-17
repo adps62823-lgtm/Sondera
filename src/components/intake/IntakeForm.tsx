@@ -259,10 +259,10 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit, isSubmitting }
           <Info className="w-4 h-4 text-forest-700 dark:text-forest-400 shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-ink-primary dark:text-neutral-200">
-              Local checks first; web research is optional
+              Your message stays on this device unless you choose to search
             </p>
             <p>
-              Message and URL pattern checks run in your browser. If you later choose “Research this message,” the message is sent to Google Gemini and Search; you will see that choice before it happens.
+              Basic warning checks run in your browser. Online source research sends the submitted text to our research and search providers.
             </p>
           </div>
         </div>

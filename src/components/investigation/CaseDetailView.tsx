@@ -23,7 +23,6 @@ import { TrustDebtPanel } from './TrustDebtPanel';
 import { ContextClockView } from './ContextClockView';
 import { TrustGraphView } from './TrustGraphView';
 import { WhatIfLab } from './WhatIfLab';
-import { LocalNeuralAiPanel } from './LocalNeuralAiPanel';
 import { EvidenceManager } from '../evidence/EvidenceManager';
 import { CaseNotes } from '../notes/CaseNotes';
 import { DecisionReceiptView } from '../reports/DecisionReceiptView';
@@ -46,7 +45,6 @@ import {
   ArchiveRestore,
   Tag as TagIcon,
   Plus,
-  Cpu,
 } from 'lucide-react';
 
 interface CaseDetailViewProps {
@@ -69,7 +67,7 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
   } | null>(null);
 
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'evidence' | 'timeline' | 'graph' | 'what_if' | 'neural_ai' | 'notes' | 'receipt'
+    'overview' | 'evidence' | 'timeline' | 'graph' | 'what_if' | 'notes' | 'receipt'
   >('overview');
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved');
   const [isReanalyzing, setIsReanalyzing] = useState(false);
@@ -412,18 +410,6 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
         </button>
 
         <button
-          onClick={() => setActiveTab('neural_ai')}
-          className={`flex items-center gap-1.5 px-4 py-2.5 font-medium border-b-2 transition whitespace-nowrap ${
-            activeTab === 'neural_ai'
-              ? 'border-indigo-600 text-indigo-800 dark:text-indigo-200 font-bold'
-              : 'border-transparent text-ink-secondary dark:text-neutral-400 hover:text-ink-primary'
-          }`}
-        >
-          <Cpu className="w-4 h-4 text-indigo-600" />
-          <span>Ask about this case</span>
-        </button>
-
-        <button
           onClick={() => setActiveTab('notes')}
           className={`flex items-center gap-1.5 px-4 py-2.5 font-medium border-b-2 transition whitespace-nowrap ${
             activeTab === 'notes'
@@ -543,14 +529,6 @@ export const CaseDetailView: React.FC<CaseDetailViewProps> = ({ caseId, onBackTo
           relations={relations}
           findings={findings}
           onEvidenceImported={loadCase}
-        />
-      )}
-
-      {activeTab === 'neural_ai' && (
-        <LocalNeuralAiPanel
-          caseId={caseId}
-          originalText={caseData.originalInput}
-          onClaimsImported={loadCase}
         />
       )}
 

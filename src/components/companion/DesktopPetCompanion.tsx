@@ -92,67 +92,8 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
     setIsTyping(true);
     setMood('thinking');
 
-    // Check for Gemini API key if present
-    const geminiApiKey = localStorage.getItem('sondera_gemini_api_key');
-
     try {
-      if (geminiApiKey) {
-        // Live cloud LLM call with app-awareness prompt
-        const response = await fetch(
-          'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiApiKey },
-            body: JSON.stringify({
-              contents: [
-                {
-                  role: 'user',
-                  parts: [
-                    {
-                      text: `You are CyBuddy, a friendly, ultra-helpful, approachable digital safety pet companion inside the "Sondera" web app.
-The user is currently on the "${currentTab}" tab in ${mode} mode.
-User asks: "${q}"
-
-Respond in a warm, cheerful, easy-to-understand conversational tone (max 2-3 short paragraphs).
-If the user is asking where to find something in the app:
-- To check a link: mention "Link Checker"
-- To verify an SMS or message: mention "Verify Message"
-- For emergency: mention "SOS Emergency"
-- For quizzes: mention "Safety Quiz"
-- For privacy: mention "Privacy Test"
-- For threat guide: mention "Scam Directory"`,
-                    },
-                  ],
-                },
-              ],
-            }),
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (reply) {
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: `pet-${Date.now()}`,
-                sender: 'pet',
-                text: reply,
-                timestamp: new Date().toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                }),
-              },
-            ]);
-            setMood('happy');
-            setIsTyping(false);
-            return;
-          }
-        }
-      }
-
-      // Built-in Intelligent App & Safety Assistant
+      // Local guidance keeps navigation help available without an account or API key.
       await new Promise((r) => setTimeout(r, 600));
       const lower = q.toLowerCase();
       let reply = '';

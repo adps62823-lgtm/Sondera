@@ -1,29 +1,19 @@
-# Sondera — Privacy & Data Sovereignty Model
+# Sondera — Privacy and Data Model
 
-## 1. Local Checks and Optional Online Research
-Cases, local warning checks, and stored evidence remain in the browser. Live source research and AI chat are optional. When the user starts one, the relevant message or question and the user-provided Gemini API key are sent to Google Gemini; source research also enables Google Search grounding. Do not submit sensitive personal content to online research.
+## Data stored in the browser
 
-## 2. Where Data is Stored
-All application state resides within the client's local browser environment:
-- **Storage Engine:** IndexedDB via `Dexie.js`.
-- **Database Name:** `SonderaDB`.
-- **Tables:** `cases`, `claims`, `evidence`, `relations`, `findings`, `checks`, `timelineEvents`, `notes`, `reports`, `settings`, `learningProgress`, `privacyChecklist`.
-- Local records are stored by the browser. Optional Gemini requests use HTTPS; message contents are transmitted to Google only after the user starts the online feature.
+Cases, claims, evidence, relations, findings, timelines, notes, reports, preferences, and learning progress are stored locally in the browser using IndexedDB through Dexie.js. Clearing site storage can remove these records. Export a backup before changing browsers or devices.
 
-## 3. What Leaves the Device
-- **Local:** Deterministic warning patterns, URL parsing, case storage, and report creation run in the browser.
-- **Optional Online:** The user clicks “Research this message” to send the message to Gemini with Google Search enabled. Returned source links can be saved as unreviewed evidence. Questions asked in the case chat or companion are also sent to Gemini when a key is configured.
-- **API Key:** The user's Gemini key is stored in browser local storage. It is not bundled in the application. Anyone with access to this browser profile may be able to inspect local storage.
-- **Model Download:** Optional Hugging Face text classification downloads model files to the browser cache on first use.
+## Online source research
 
-## 4. Local Storage Lifecycles & Limitations
-Because data is saved locally in IndexedDB:
-- Clearing browser cache, history, or cookies will erase local cases.
-- Incognito / Private windows wipe data upon closing the window.
-- Users can export a complete JSON backup at any time via the **Cases Library** or **Settings** view to preserve investigations across sessions and devices.
+Online research is optional and starts only when a user selects **Search current sources**. The selected message or link is sent from the browser to Sondera's `/api/research` endpoint. The endpoint uses the server-side `GEMINI_API_KEY` environment variable to request a response from Google Gemini with Google Search grounding. The key is never sent to the browser or stored in browser storage. Google processes the submitted text; do not submit private or sensitive content.
 
-## 5. Share-Safe Redaction
-When generating a Decision Receipt to share with colleagues or family, Sondera provides a **Share-Safe Mode**:
-- Automated regex detection scans for phone numbers, email addresses, OTP codes, and financial account identifiers.
-- Redacted strings are masked (e.g., `[REDACTED_PHONE]`, `[REDACTED_OTP]`) before markdown export or printing.
-- *Limitation:* Automated redaction is heuristic and should be visually reviewed prior to sharing.
+Returned source links and summaries are saved locally only when the user chooses to save them. A returned link is a lead for review, not proof that a claim is true.
+
+## Local processing
+
+Warning-pattern checks, URL parsing, case storage, and report generation run in the browser. Their results are indicators and do not certify authenticity.
+
+## Share-safe redaction
+
+Decision reports can mask common personal identifiers before export or printing. Detection is heuristic; review the final report before sharing it.

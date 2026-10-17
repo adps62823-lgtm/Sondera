@@ -92,14 +92,29 @@ async function searchNews(query: string): Promise<SearchSource[]> {
   }));
 }
 
-export async function searchSources(content: string): Promise<SearchSource[]> {
+export async function searchSources(
+  content: string,
+  onProviderComplete?: (provider: SearchSource['provider'], resultCount: number) => void,
+): Promise<SearchSource[]> {
   const query = queryFor(content);
   if (query.length < 3) return [];
-  const results = await Promise.allSettled([searchDuckDuckGo(query), searchWikipedia(query), searchNews(query)]);
+  const collect = async (provider: SearchSource['provider'], search: () => Promise<SearchSource[]>) => {
+    try {
+      const sources = await search();
+      onProviderComplete?.(provider, sources.length);
+      return sources;
+    } catch {
+      onProviderComplete?.(provider, 0);
+      return [];
+    }
+  };
+  const batches = await Promise.all([
+    collect('DuckDuckGo', () => searchDuckDuckGo(query)),
+    collect('Wikipedia', () => searchWikipedia(query)),
+    collect('GDELT news', () => searchNews(query)),
+  ]);
   const unique = new Map<string, SearchSource>();
-  for (const result of results) if (result.status === 'fulfilled') {
-    for (const source of result.value) if (!unique.has(source.url)) unique.set(source.url, source);
-  }
+  for (const batch of batches) for (const source of batch) if (!unique.has(source.url)) unique.set(source.url, source);
   return Array.from(unique.values()).slice(0, 12);
 }
 

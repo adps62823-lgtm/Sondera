@@ -36,6 +36,7 @@ interface PetMessage {
   };
   timestamp: string;
   citations?: Array<{ title: string; url: string; provider?: string }>;
+  activity?: Array<{ provider: string; resultCount: number }>;
 }
 
 export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
@@ -48,6 +49,8 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
   const [mood, setMood] = useState<'vigilant' | 'happy' | 'alert' | 'thinking'>('vigilant');
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [researchStage, setResearchStage] = useState('');
+  const [searchActivity, setSearchActivity] = useState<Array<{ provider: string; resultCount: number }>>([]);
   const [bubbleText, setBubbleText] = useState<string | null>(
     'Need help or have questions? Click me!'
   );
@@ -92,6 +95,8 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
     if (!queryText) setInputText('');
     setIsTyping(true);
     setMood('thinking');
+    setResearchStage('Connecting to Sonder…');
+    setSearchActivity([]);
 
     try {
       const history = [...messages.slice(-10).map((message) => ({
@@ -103,8 +108,33 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: history, mode, currentTab }),
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Sonder could not answer just now.');
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Sonder could not answer just now.');
+      }
+      let data: { answer?: string; citations?: Array<{ title: string; url: string; provider?: string }>; activity?: Array<{ provider: string; resultCount: number }> } = {};
+      if (response.headers.get('content-type')?.includes('application/x-ndjson') && response.body) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        const processLine = (line: string) => {
+          if (!line.trim()) return;
+          const event = JSON.parse(line) as { type: string; label?: string; provider?: string; resultCount?: number; error?: string; answer?: string; citations?: Array<{ title: string; url: string; provider?: string }>; activity?: Array<{ provider: string; resultCount: number }> };
+          if (event.type === 'stage') setResearchStage(event.label || 'Searching sources…');
+          if (event.type === 'provider-complete' && event.provider) setSearchActivity((items) => [...items.filter((item) => item.provider !== event.provider), { provider: event.provider!, resultCount: event.resultCount || 0 }]);
+          if (event.type === 'error') throw new Error(event.error || 'Sonder could not answer just now.');
+          if (event.type === 'complete') data = event;
+        };
+        while (true) {
+          const { value, done } = await reader.read();
+          buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+          lines.forEach(processLine);
+          if (done) break;
+        }
+        if (buffer.trim()) processLine(buffer);
+      } else data = await response.json();
       const lower = q.toLowerCase();
       let actionBtn: PetMessage['actionButton'];
       if (lower.includes('mode')) actionBtn = { label: `Switch to ${mode === 'simple' ? 'Technical' : 'Simple'} Mode`, modeAction: mode === 'simple' ? 'technical' : 'simple' };
@@ -119,6 +149,7 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
         sender: 'pet',
         text: typeof data.answer === 'string' ? data.answer : 'I could not form an answer. Please try again.',
         citations: Array.isArray(data.citations) ? data.citations : [],
+        activity: Array.isArray(data.activity) ? data.activity : [],
         actionButton: actionBtn,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       }]);
@@ -133,6 +164,7 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
       setMood('vigilant');
     } finally {
       setIsTyping(false);
+      setResearchStage('');
     }
   };
 
@@ -311,6 +343,11 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
                       ))}
                     </div>
                   )}
+                  {m.activity && m.activity.length > 0 && <details className="border-t border-surface-border/60 dark:border-surface-darkBorder/60 pt-2">
+                    <summary className="cursor-pointer text-[10px] font-semibold">Search activity</summary>
+                    <p className="mt-1 text-[10px]">Gemini prepared this reply using Google Search and the listed independent results. Search results can be incomplete or wrong.</p>
+                    <ul className="mt-1 space-y-0.5 text-[10px]">{m.activity.map((item) => <li key={item.provider} className="flex justify-between gap-3"><span>{item.provider}</span><span>{item.resultCount} found</span></li>)}</ul>
+                  </details>}
 
                       {/* Action Button if attached */}
                       {m.actionButton && (
@@ -341,7 +378,7 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
                 {isTyping && (
                   <div className="flex items-center gap-2 text-[11px] text-ink-muted p-2">
                     <span className="animate-spin text-sm">🐾</span>
-                    <span>Sonder is searching and preparing an answer…</span>
+                    <div><span>{researchStage || 'Sonder is preparing an answer…'}</span>{searchActivity.length > 0 && <div className="mt-1 flex flex-wrap gap-1">{searchActivity.map((item) => <span key={item.provider} className="rounded-full bg-surface-muted dark:bg-surface-darkMuted px-1.5 py-0.5">{item.provider}: {item.resultCount}</span>)}</div>}</div>
                   </div>
                 )}
                 <div ref={chatBottomRef} />

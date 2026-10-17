@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ExternalLink, Globe2, LoaderCircle, Save, SearchCheck } from 'lucide-react';
 import { db } from '../../services/db';
+import { useAppMode } from '../../context/ModeContext';
 
 type WebCitation = { title: string; url: string; provider?: string; snippet?: string };
 
@@ -26,6 +27,9 @@ export const SourceResearchPanel: React.FC<SourceResearchPanelProps> = ({ caseId
   const [citations, setCitations] = useState<WebCitation[]>([]);
   const [saved, setSaved] = useState(false);
   const [researchAt, setResearchAt] = useState('');
+  const [researchStage, setResearchStage] = useState('');
+  const [activity, setActivity] = useState<Array<{ provider: string; resultCount: number }>>([]);
+  const { mode } = useAppMode();
 
   const research = async () => {
     setLoading(true);
@@ -33,19 +37,52 @@ export const SourceResearchPanel: React.FC<SourceResearchPanelProps> = ({ caseId
     setAnswer('');
     setCitations([]);
     setSaved(false);
+    setActivity([]);
+    setResearchStage('Connecting to source search…');
     try {
       const response = await fetch('/api/research', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, kind }),
+        body: JSON.stringify({ content, kind, mode }),
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Research is temporarily unavailable. Please try again later.');
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Research is temporarily unavailable. Please try again later.');
+      }
+      let data: { answer?: string; citations?: WebCitation[]; activity?: Array<{ provider: string; resultCount: number }> } = {};
+      if (response.headers.get('content-type')?.includes('application/x-ndjson') && response.body) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        const processLine = (line: string) => {
+          if (!line.trim()) return;
+          const event = JSON.parse(line) as { type: string; provider?: string; resultCount?: number; label?: string; error?: string; answer?: string; citations?: WebCitation[]; activity?: Array<{ provider: string; resultCount: number }> };
+          if (event.type === 'stage') setResearchStage(event.label || 'Research in progress…');
+          if (event.type === 'provider-complete' && event.provider) {
+            setActivity((current) => [...current.filter((item) => item.provider !== event.provider), { provider: event.provider!, resultCount: event.resultCount || 0 }]);
+          }
+          if (event.type === 'error') throw new Error(event.error || 'Research could not be completed.');
+          if (event.type === 'complete') data = event;
+        };
+        while (true) {
+          const { value, done } = await reader.read();
+          buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+          lines.forEach(processLine);
+          if (done) break;
+        }
+        if (buffer.trim()) processLine(buffer);
+      } else {
+        data = await response.json();
+      }
       const text = typeof data.answer === 'string' ? data.answer.trim() : '';
       if (!text) throw new Error('No findings were returned. Please try again.');
       setAnswer(text);
       setResearchAt(new Date().toISOString());
       setCitations(Array.isArray(data.citations) ? data.citations : []);
+      if (Array.isArray(data.activity)) setActivity(data.activity);
+      setResearchStage('Source comparison complete');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not complete source research.');
     } finally {
@@ -112,9 +149,19 @@ export const SourceResearchPanel: React.FC<SourceResearchPanelProps> = ({ caseId
           {loading ? 'Searching current sources…' : 'Search current sources'}
         </button>
       </div>
+      {loading && <div className="rounded-xl border border-forest-200 dark:border-forest-800 bg-forest-50/70 dark:bg-forest-950/20 p-3 space-y-2" aria-live="polite">
+        <div className="flex items-center gap-2 text-sm font-semibold text-forest-900 dark:text-forest-100"><LoaderCircle className="w-4 h-4 animate-spin" />{researchStage || 'Research in progress…'}</div>
+        <p className="text-xs text-ink-secondary dark:text-neutral-300">Searching Google, DuckDuckGo, Wikipedia, and current news, then comparing returned sources with the submitted content.</p>
+        {activity.length > 0 && <div className="flex flex-wrap gap-1.5">{activity.map((item) => <span key={item.provider} className="rounded-full bg-white dark:bg-surface-darkCard px-2 py-1 text-[10px]">{item.provider}: {item.resultCount} found</span>)}</div>}
+      </div>}
       {error && <p role="alert" className="rounded-lg bg-red-50 dark:bg-red-950/40 p-3 text-sm text-red-800 dark:text-red-200">{error}</p>}
       {answer && <div className="space-y-3 border-t border-surface-border dark:border-surface-darkBorder pt-4">
         <div className="whitespace-pre-wrap text-sm leading-relaxed text-ink-primary dark:text-neutral-100">{answer}</div>
+        <details className="rounded-xl border border-surface-border dark:border-surface-darkBorder bg-surface-muted/60 dark:bg-surface-darkMuted p-3">
+          <summary className="cursor-pointer text-xs font-semibold">How this check ran</summary>
+          <p className="mt-2 text-xs text-ink-secondary dark:text-neutral-300">{mode === 'simple' ? 'Sondera searched several sources. Gemini compared those results with the message; these links are leads for you to review.' : `Output mode: ${mode}. Google Gemini 2.5 Flash synthesized the response with Google Search grounding after the independent searches. Result counts come from each provider and may include duplicates.`}</p>
+          <ul className="mt-2 space-y-1 text-xs">{activity.map((item) => <li key={item.provider} className="flex justify-between gap-3"><span>{item.provider}</span><span>{item.resultCount} result{item.resultCount === 1 ? '' : 's'}</span></li>)}</ul>
+        </details>
         {citations.length > 0 ? <div className="rounded-xl bg-surface-muted dark:bg-surface-darkMuted p-3 space-y-2">
           <h3 className="text-xs font-bold text-ink-primary dark:text-neutral-100">Sources to review</h3>
           <ul className="space-y-2">{citations.map((citation) => <li key={citation.url}>

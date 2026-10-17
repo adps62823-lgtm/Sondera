@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useAppMode, AppMode } from '../../context/ModeContext';
 import { NavTab } from '../layout/Navbar';
+import { readApiError, readApiJson } from '../../services/api-response';
 
 interface DesktopPetCompanionProps {
   onNavigate: (tab: NavTab) => void;
@@ -99,18 +100,20 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
     setSearchActivity([]);
 
     try {
-      const history = [...messages.slice(-10).map((message) => ({
+      const historyItems = messages.slice(-10).map((message) => ({
         role: message.sender === 'user' ? 'user' : 'model',
         text: message.text,
-      })), { role: 'user', text: q }];
+      }));
+      const firstUserIndex = historyItems.findIndex((message) => message.role === 'user');
+      const history = firstUserIndex >= 0 ? historyItems.slice(firstUserIndex) : [];
+      history.push({ role: 'user', text: q });
       const response = await fetch('/api/buddy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: history, mode, currentTab }),
       });
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Sonder could not answer just now.');
+        throw await readApiError(response, 'Sonder', mode === 'technical');
       }
       let data: { answer?: string; citations?: Array<{ title: string; url: string; provider?: string }>; activity?: Array<{ provider: string; resultCount: number }> } = {};
       if (response.headers.get('content-type')?.includes('application/x-ndjson') && response.body) {
@@ -134,7 +137,7 @@ export const DesktopPetCompanion: React.FC<DesktopPetCompanionProps> = ({
           if (done) break;
         }
         if (buffer.trim()) processLine(buffer);
-      } else data = await response.json();
+      } else data = await readApiJson<typeof data>(response, 'Sonder', mode === 'technical');
       const lower = q.toLowerCase();
       let actionBtn: PetMessage['actionButton'];
       if (lower.includes('mode')) actionBtn = { label: `Switch to ${mode === 'simple' ? 'Technical' : 'Simple'} Mode`, modeAction: mode === 'simple' ? 'technical' : 'simple' };

@@ -36,11 +36,13 @@ export default async function handler(request: Request): Promise<Response> {
       mode?: unknown;
       currentTab?: unknown;
     };
-    messages = Array.isArray(body.messages) ? body.messages.slice(-12).flatMap((message) => {
+    const sanitizedMessages = Array.isArray(body.messages) ? body.messages.slice(-12).flatMap((message) => {
       if (!message || (message.role !== 'user' && message.role !== 'model') || typeof message.text !== 'string') return [];
       const text = message.text.trim().slice(0, 1800);
-      return text ? [{ role: message.role, text }] : [];
+      return text ? [{ role: message.role as 'user' | 'model', text }] : [];
     }) : [];
+    const firstUserIndex = sanitizedMessages.findIndex((message) => message.role === 'user');
+    messages = firstUserIndex >= 0 ? sanitizedMessages.slice(firstUserIndex) : [];
     latest = [...messages].reverse().find((message) => message.role === 'user')?.text || '';
     if (!latest) return json(400, { error: 'Write a message to Sonder first.' });
     mode = body.mode === 'technical' ? 'technical' : 'simple';

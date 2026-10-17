@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ExternalLink, Globe2, LoaderCircle, Save, SearchCheck } from 'lucide-react';
 import { db } from '../../services/db';
 import { useAppMode } from '../../context/ModeContext';
+import { readApiError, readApiJson } from '../../services/api-response';
 
 type WebCitation = { title: string; url: string; provider?: string; snippet?: string };
 
@@ -46,8 +47,7 @@ export const SourceResearchPanel: React.FC<SourceResearchPanelProps> = ({ caseId
         body: JSON.stringify({ content, kind, mode }),
       });
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Research is temporarily unavailable. Please try again later.');
+        throw await readApiError(response, 'Online research', mode === 'technical');
       }
       let data: { answer?: string; citations?: WebCitation[]; activity?: Array<{ provider: string; resultCount: number }> } = {};
       if (response.headers.get('content-type')?.includes('application/x-ndjson') && response.body) {
@@ -74,7 +74,7 @@ export const SourceResearchPanel: React.FC<SourceResearchPanelProps> = ({ caseId
         }
         if (buffer.trim()) processLine(buffer);
       } else {
-        data = await response.json();
+        data = await readApiJson<typeof data>(response, 'Online research', mode === 'technical');
       }
       const text = typeof data.answer === 'string' ? data.answer.trim() : '';
       if (!text) throw new Error('No findings were returned. Please try again.');
